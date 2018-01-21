@@ -26,6 +26,7 @@ include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 add_executable(rtcm3 src/rtcm3.cpp)
 target_link_libraries(rtcm3 ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(rtcm3 rtcm3_ros_generate_messages)
 
 install(TARGETS rtcm3
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

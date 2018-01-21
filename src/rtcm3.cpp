@@ -28,7 +28,7 @@
  */
 
 #include <ros/ros.h>
-#include <rtcm3/BinaryStream.h>
+#include <rtcm3_ros/BinaryStream.h>
 
 #include <boost/asio.hpp>
 
@@ -104,7 +104,7 @@ private:
     }
     auto length = buf_.size();
 
-    rtcm3::BinaryStream array;
+    rtcm3_ros::BinaryStream array;
     const uint8_t *p = boost::asio::buffer_cast<const uint8_t *>(buf_.data());
     array.header.frame_id = frame_id_;
     array.header.stamp = ros::Time::now();
@@ -137,7 +137,7 @@ public:
     pnh_.param("ip", ip_, std::string("127.0.0.1"));
     pnh_.param("port", port_, 8020);
 
-    pub_stream_ = nh_.advertise<rtcm3::BinaryStream>("rtcm3", 10);
+    pub_stream_ = nh_.advertise<rtcm3_ros::BinaryStream>("rtcm3", 10);
 
     ROS_INFO("Connecting to %s:%d", ip_.c_str(), port_);
 
