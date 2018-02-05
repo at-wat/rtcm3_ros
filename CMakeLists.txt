@@ -28,7 +28,13 @@ add_executable(rtcm3 src/rtcm3.cpp)
 target_link_libraries(rtcm3 ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(rtcm3 rtcm3_ros_generate_messages)
 
-install(TARGETS rtcm3
+add_executable(rtcm3_decode src/rtcm3_decode.cpp)
+target_link_libraries(rtcm3_decode ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(rtcm3_decode rtcm3_ros_generate_messages)
+
+install(TARGETS
+    rtcm3
+    rtcm3_decode
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
