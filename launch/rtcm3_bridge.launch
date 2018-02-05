@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-  <node name="rtcm3" pkg="rtcm3_ros" type="rtcm3" respawn="true"/>
+  <arg name="ip" default="127.0.0.1" />
+  <arg name="port" default="8020" />
+
+  <node name="rtcm3" pkg="rtcm3_ros" type="rtcm3" respawn="true">
+    <param name="ip" value="$(arg ip)" />
+    <param name="port" value="$(arg port)" />
+  </node>
+
+  <node pkg="rosbag" type="record" name="record" args="-o gnss -b 1 /rosout /rtcm3"/>
 </launch>
