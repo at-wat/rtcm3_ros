@@ -30,28 +30,9 @@
 #include <ros/ros.h>
 #include <rtcm3_ros/BinaryStream.h>
 
-#include <string>
+#include <rtcm3_ros/rtcm3_decoder.h>
 
-unsigned int getUnsignedBits(
-    const rtcm3_ros::BinaryStream::ConstPtr &msg, size_t pos, size_t len)
-{
-  unsigned int bits = 0;
-  for (size_t i = pos; i < pos + len; i++)
-  {
-    bits = (bits << 1) + ((msg->data[i / 8] >> (7 - i % 8)) & 1u);
-  }
-  return bits;
-}
-int getSignedBits(
-    const rtcm3_ros::BinaryStream::ConstPtr &msg, size_t pos, size_t len)
-{
-  unsigned int bits = getUnsignedBits(msg, pos, len);
-  if (!(bits & (1u << (len - 1))))
-  {
-    return (int)bits;
-  }
-  return (int)(bits | (~0u << len));
-}
+#include <string>
 
 class RTCM3Decode
 {
@@ -61,33 +42,11 @@ private:
   ros::Subscriber sub_stream_;
   std::map<std::string, ros::Publisher> pub_;
 
+  rtcm3_ros::RTCM3Decoder dec_;
+
   void cbStream(const rtcm3_ros::BinaryStream::ConstPtr &msg)
   {
-    size_t i = 0;
-    while (true)
-    {
-      for (; i < msg->data.size(); ++i)
-      {
-        if (msg->data[i] == 0xD3)
-          break;
-      }
-      if (i == msg->data.size())
-        return;
-      const size_t length = getUnsignedBits(msg, i * 8 + 14, 10);
-      if (length == 0 || length + 3 + 3 > msg->data.size() - i)
-      {
-        ++i;
-        continue;
-      }
-      const int type = getUnsignedBits(msg, i * 8 + 24, 12);
-      ROS_INFO("RTCM3: message type %d, length %d /%d",
-               type,
-               static_cast<int>(length) + 3 + 3,
-               static_cast<int>(msg->data.size() - i));
-      i += 3;
-
-      i += length + 3;
-    }
+    dec_ << msg->data;
   }
 
 public:

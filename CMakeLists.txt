@@ -22,7 +22,7 @@ else()
 	message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} include)
 
 add_executable(rtcm3 src/rtcm3.cpp)
 target_link_libraries(rtcm3 ${catkin_LIBRARIES} ${Boost_LIBRARIES})
