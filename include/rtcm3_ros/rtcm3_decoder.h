@@ -37,8 +37,9 @@ public:
     return classes_[type]->spawn();
   };
   template <typename T>
-  void registerClass(const int &type)
+  void registerClass()
   {
+    const int type = T().getType();
     classes_[type] = SpawnerBase::Ptr(new Spawner<T>);
   };
 };
@@ -52,7 +53,8 @@ protected:
 public:
   RTCM3Decoder()
   {
-    decoders_.registerClass<RTCM3MessageEphemeridesGps>(1019);
+    decoders_.registerClass<RTCM3MessageEphemeridesGps>();
+    decoders_.registerClass<RTCM3MessagePseudoRangeMsm7>();
   }
 
   void operator<<(const Buffer &input)
