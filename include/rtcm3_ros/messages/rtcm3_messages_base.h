@@ -22,7 +22,7 @@ class RTCM3MessageEphemeridesBase : public RTCM3MessageBase
 public:
   virtual int getType() const = 0;
   virtual bool decode(const Buffer &) = 0;
-  virtual ECEF getPos(const int &sat, const GTime &time) const = 0;
+  virtual ECEF getPos(const GTime &time) const = 0;
 };
 
 class RTCM3MessagePseudoRangeBase : public RTCM3MessageBase

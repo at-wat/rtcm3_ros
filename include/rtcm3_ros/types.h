@@ -25,6 +25,18 @@ public:
     , z_(z)
   {
   }
+  double x() const
+  {
+    return x_;
+  }
+  double y() const
+  {
+    return y_;
+  }
+  double z() const
+  {
+    return z_;
+  }
 };
 
 class GTime;
@@ -63,6 +75,10 @@ public:
       sec_ = sec;
       psec_ = psec;
     }
+  }
+  double toSec() const
+  {
+    return static_cast<double>(sec_) + psec_ * 1e-12;
   }
 };
 
@@ -106,10 +122,6 @@ public:
       return psec_ < in.psec_;
     return sec_ < in.sec_;
   }
-  double toSec() const
-  {
-    return static_cast<double>(sec_) + psec_ * 1e-12;
-  }
   static Time now()
   {
     timespec start;
@@ -132,6 +144,11 @@ public:
   GTime()
   {
     week_ = tow_psec_ = 0;
+  }
+  GTime(uint64_t week, uint64_t tow_psec)
+  {
+    week_ = week;
+    tow_psec_ = tow_psec;
   }
   GTime(const Time t)
   {
@@ -183,6 +200,40 @@ public:
       ret.tow_psec_ -= 604800 * SEC;
 
     return ret;
+  }
+  static GTime fromTow(const uint64_t tow_psec, const GTime t0)
+  {
+    GTime ret;
+    ret.week_ = t0.week_;
+    ret.tow_psec_ = tow_psec;
+    if (ret.tow_psec_ < t0.tow_psec_ - 302400 * SEC)
+      ret.tow_psec_ += 604800 * SEC;
+    else if (ret.tow_psec_ > t0.tow_psec_ + 302400 * SEC)
+      ret.tow_psec_ -= 604800 * SEC;
+
+    return ret;
+  }
+  static GTime from10bitsWeek(const uint64_t week)
+  {
+    GTime now = Time::now();
+    if (now.week_ < 1560)
+      now.week_ = 1560;
+
+    return GTime(week + (now.week_ - week + 512) / 1024 * 1024, 0);
+  }
+  double getTow() const
+  {
+    return static_cast<double>(tow_psec_) / static_cast<double>(SEC);
+  }
+  Duration operator-(const GTime &in) const
+  {
+    if (static_cast<int64_t>(week_) - static_cast<int64_t>(in.week_) != 0)
+    {
+      throw std::runtime_error("Different week");
+    }
+    return Duration(
+        0.0,
+        static_cast<int64_t>(tow_psec_) - static_cast<int64_t>(in.tow_psec_));
   }
 };
 

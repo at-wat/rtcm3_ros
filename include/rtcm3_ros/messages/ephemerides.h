@@ -17,7 +17,7 @@ protected:
   // SV health (0:ok)
   int svh_;
   // GPS/QZS: gps week, GAL: galileo week
-  int week_;
+  GTime week_;
   // GPS/QZS: code on L2, GAL/CMP: data sources
   int code_;
   // GPS/QZS: L2 P data flag, CMP: nav type
@@ -29,8 +29,6 @@ protected:
   double A_, e_, i0_, OMG0_, omg_, M0_, deln_, OMGd_, idot_;
   double crc_, crs_, cuc_, cus_, cic_, cis_;
 
-  // Toe (s) in week
-  double toes_;
   // fit interval (h)
   double fit_;
   // SV clock parameters (af0,af1,af2)
@@ -63,7 +61,7 @@ public:
     i += 14;
     iode_ = buf.getUnsignedBits(i, 8);
     i += 8;
-    const double toc = buf.getUnsignedBits(i, 16) * 16.0;
+    const uint64_t toc = buf.getUnsignedBits(i, 16) * 16;
     i += 16;
     f2_ = buf.getSignedBits(i, 8) * P2_55;
     i += 8;
@@ -87,7 +85,7 @@ public:
     i += 16;
     const double sqrtA = buf.getUnsignedBits(i, 32) * P2_19;
     i += 32;
-    toes_ = buf.getUnsignedBits(i, 16) * 16.0;
+    const uint64_t toes = buf.getUnsignedBits(i, 16) * 16;
     i += 16;
     cic_ = buf.getSignedBits(i, 16) * P2_29;
     i += 16;
@@ -111,12 +109,70 @@ public:
     i += 1;
     fit_ = buf.getUnsignedBits(i, 1) ? 0.0 : 4.0;  // 0:4hr, 1:>4hr
 
-    ROS_WARN("prn: %d", prn);
+    week_ = GTime::from10bitsWeek(week);
+    toe_ = GTime::fromTow(toes * 1000000000000, week_);
+    toc_ = GTime::fromTow(toc * 1000000000000, week_);
+    A_ = sqrtA * sqrtA;
+
+    const auto pos = getPos(toe_);
+    ROS_WARN(" - [prn: %d] %0.3lf, %0.3lf, %0.3lf", prn, pos.x(), pos.y(), pos.z());
     return true;
   }
-  ECEF getPos(const int &sat, const GTime &time) const
+  ECEF getPos(const GTime &time) const
   {
-    return ECEF();
+    double M, E, Ek, sinE, cosE, u, r, i, O, sin2u, cos2u, x, y, sinO, cosO, cosi, mu, omge;
+    double xg, yg, zg, sino, coso;
+    int n, sys, prn;
+    const Duration tk = time - toc_;
+
+    mu = MU_GPS;
+    omge = OMGE;
+
+    M = M0_ + (sqrt(mu / (A_ * A_ * A_)) + deln_) * tk.toSec();
+    for (n = 0, E = M, Ek = 0.0; fabs(E - Ek) > 1e-14 && n < 30; n++)
+    {
+      Ek = E;
+      E -= (E - e_ * sin(E) - M) / (1.0 - e_ * cos(E));
+    }
+    sinE = sin(E);
+    cosE = cos(E);
+
+    u = atan2(sqrt(1.0 - e_ * e_) * sinE, cosE - e_) + omg_;
+    r = A_ * (1.0 - e_ * cosE);
+    i = i0_ + idot_ * tk.toSec();
+    sin2u = sin(2.0 * u);
+    cos2u = cos(2.0 * u);
+    u += cus_ * sin2u + cuc_ * cos2u;
+    r += crs_ * sin2u + crc_ * cos2u;
+    i += cis_ * sin2u + cic_ * cos2u;
+    x = r * cos(u);
+    y = r * sin(u);
+    cosi = cos(i);
+
+    O = OMG0_ + (OMGd_ - omge) * tk.toSec() - omge * toe_.getTow();
+    sinO = sin(O);
+    cosO = cos(O);
+    ECEF pos(
+        x * cosO - y * cosi * sinO,
+        x * sinO + y * cosi * cosO,
+        y * sin(i));
+
+    const double dts =
+        f0_ + f1_ * tk.toSec() + f2_ * tk.toSec() * tk.toSec() -
+        2.0 * sqrt(mu * A_) * e_ * sinE / pow(CLIGHT, 2.0);
+    return pos;
+  }
+  double getVariance()
+  {
+    const double URA_VALUE[] = {
+      2.4, 3.4, 4.85, 6.85,
+      9.65, 13.65, 24.0, 48.0,
+      96.0, 192.0, 384.0, 768.0,
+      1536.0, 3072.0, 6144.0
+    };
+    if (0 > sva_ || sva_ < 15)
+      return pow(6144.8, 2.0);
+    return pow(URA_VALUE[sva_], 2.0);
   }
 };
 
