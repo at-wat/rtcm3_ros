@@ -107,6 +107,27 @@ public:
         }
         case RTCM3MessageBase::Category::PSEUDO_RANGE:
         {
+          RTCM3MessagePseudoRangeBase::Ptr ranges = std::dynamic_pointer_cast<RTCM3MessagePseudoRangeBase>(decoder);
+          ROS_INFO("---");
+          for (auto &range : *ranges)
+          {
+            if (ephemerides_.find(range.first) != ephemerides_.end())
+            {
+              const ECEF sat_pos = ephemerides_[range.first]->getPos(range.second.getTime());
+              ROS_INFO("[%2d] r: %10.1f, p: %6.1f, sat: (%11.1f, %11.1f, %11.1f)",
+                       range.first,
+                       range.second.getPseudoRange(),
+                       range.second.getPhaseRange(),
+                       sat_pos.x(), sat_pos.y(), sat_pos.z());
+            }
+            else
+            {
+              ROS_INFO("[%2d] r: %10.1f, p: %6.1f, no ephemerides",
+                       range.first,
+                       range.second.getPseudoRange(),
+                       range.second.getPhaseRange());
+            }
+          }
           break;
         }
       }

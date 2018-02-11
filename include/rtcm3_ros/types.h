@@ -189,6 +189,10 @@ public:
     tow_psec_ = (duration.sec_ - week_ * (86400 * 7)) * SEC +
                 duration.psec_;
   }
+  static GTime fromTow(const double tow, const Time t0 = Time::now())
+  {
+    return fromTow(static_cast<uint64_t>(tow * SEC), t0);
+  }
   static GTime fromTow(const uint64_t tow_psec, const Time t0 = Time::now())
   {
     GTime ret;
@@ -265,6 +269,22 @@ public:
     phase_ = phase;
     pseudo_range_ = pseudo_range;
     doppler_frequency_ = doppler_frequency;
+  }
+  GTime getTime() const
+  {
+    return time_;
+  }
+  double getPseudoRange() const
+  {
+    return pseudo_range_;
+  }
+  double getPhaseRange() const
+  {
+    return phase_;
+  }
+  double getDopplerFrequency() const
+  {
+    return doppler_frequency_;
   }
 };
 };  // namespace rtcm3_ros

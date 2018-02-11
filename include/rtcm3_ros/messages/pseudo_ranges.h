@@ -88,13 +88,15 @@ public:
 
     return i;
   }
+  virtual Container::iterator begin() = 0;
+  virtual Container::iterator end() = 0;
 };
 
 class RTCM3MessagePseudoRangeMsm7 : public RTCM3MessagePseudoRangeMsm
 {
 protected:
   GTime stamp_;
-  std::map<int, PseudoRange> ranges_;
+  Container ranges_;
 
 public:
   constexpr int getType() const
@@ -131,7 +133,7 @@ public:
     const GTime stamp = GTime::fromTow(tow);
 
     size_t i = decodeHeader(buf);
-    ROS_WARN("sats: %ld, sigs: %ld, tow: %0.3lf", sats_.size(), sigs_.size(), tow);
+    ROS_DEBUG("paseudo_ranges: sats: %ld, sigs: %ld, tow: %0.3lf", sats_.size(), sigs_.size(), stamp.getTow());
 
     std::map<size_t, double> pseudo_range_base;
     for (auto &sat : sats_)
@@ -191,14 +193,22 @@ public:
       const double wave_length = CLIGHT / base_frequency;
       const double doppler_shift = phase_range_rate / wave_length;
 
-      ROS_INFO(" - sat(%d), sig(%d): pseudo_range=%0.3lf, phase_range=%0.3lf, doppler=%0.1lf",
-               satsig.first.first, satsig.first.second,
-               pseudo_range, phase_range, doppler_shift);
+      ROS_DEBUG(" - sat(%d), sig(%d): pseudo_range=%0.3lf, phase_range=%0.3lf, doppler=%0.1lf",
+                satsig.first.first, satsig.first.second,
+                pseudo_range, phase_range, doppler_shift);
 
       ranges_[satsig.first.first] = PseudoRange(stamp, snr, 0, 0, pseudo_range, phase_range, doppler_shift);
     }
 
     return true;
+  }
+  Container::iterator begin()
+  {
+    return ranges_.begin();
+  }
+  Container::iterator end()
+  {
+    return ranges_.end();
   }
 };
 

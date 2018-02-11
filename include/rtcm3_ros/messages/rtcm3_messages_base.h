@@ -41,12 +41,24 @@ class RTCM3MessagePseudoRangeBase : public RTCM3MessageBase
 {
 public:
   using Ptr = std::shared_ptr<RTCM3MessagePseudoRangeBase>;
+  using Container = std::map<int, PseudoRange>;
+
   virtual int getType() const = 0;
   int getCategory() const
   {
     return Category::PSEUDO_RANGE;
   }
   virtual bool decode(const Buffer &) = 0;
+  virtual Container::iterator begin() = 0;
+  virtual Container::iterator end() = 0;
+  const Container::iterator begin() const
+  {
+    return begin();
+  }
+  const Container::iterator end() const
+  {
+    return end();
+  }
 };
 
 };  // namespace rtcm3_ros

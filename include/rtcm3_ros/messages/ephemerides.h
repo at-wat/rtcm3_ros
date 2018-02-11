@@ -117,7 +117,7 @@ public:
     A_ = sqrtA * sqrtA;
 
     const auto pos = getPos(GTime(Time::now()));
-    ROS_WARN(" - [prn: %d] %0.3lf, %0.3lf, %0.3lf", prn, pos.x(), pos.y(), pos.z());
+    ROS_DEBUG("[prn: %2d] sat position: %0.3lf, %0.3lf, %0.3lf", prn, pos.x(), pos.y(), pos.z());
     return true;
   }
   ECEF getPos(const GTime &time) const
