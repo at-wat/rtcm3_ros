@@ -1,5 +1,5 @@
-#ifndef RTCM3_ROS_CONSTATNTS_H
-#define RTCM3_ROS_CONSTATNTS_H
+#ifndef RTCM3_ROS_CONSTANTS_H
+#define RTCM3_ROS_CONSTANTS_H
 
 namespace rtcm3_ros
 {
@@ -62,4 +62,4 @@ const double J2_GLO = 1.0826257E-3;    // 2nd zonal harmonic of geopot
 
 };  // namespace rtcm3_ros
 
-#endif  // RTCM3_ROS_CONSTATNTS_H
+#endif  // RTCM3_ROS_CONSTANTS_H

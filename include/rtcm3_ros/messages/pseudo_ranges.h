@@ -1,6 +1,9 @@
 #ifndef RTCM3_ROS_MESSAGES_PSEUDO_RANGES_H
 #define RTCM3_ROS_MESSAGES_PSEUDO_RANGES_H
 
+#include <map>
+#include <utility>
+#include <vector>
 #include <rtcm3_ros/messages/rtcm3_messages_base.h>
 
 namespace rtcm3_ros

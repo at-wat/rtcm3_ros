@@ -1,6 +1,7 @@
 #ifndef RTCM3_ROS_RTCM3_DECODER_H
 #define RTCM3_ROS_RTCM3_DECODER_H
 
+#include <map>
 #include <vector>
 #include <rtcm3_ros/buffer.h>
 #include <rtcm3_ros/rtcm3_messages.h>
@@ -102,10 +103,12 @@ public:
         {
           RTCM3MessageEphemeridesBase::Ptr eph = std::dynamic_pointer_cast<RTCM3MessageEphemeridesBase>(decoder);
           ephemerides_[eph->getSatId()] = eph;
-        }
-        break;
-        case RTCM3MessageBase::Category::PSEUDO_RANGE:
           break;
+        }
+        case RTCM3MessageBase::Category::PSEUDO_RANGE:
+        {
+          break;
+        }
       }
     }
     catch (std::runtime_error &e)
@@ -114,6 +117,6 @@ public:
     }
   }
 };
-};  // namespace RTCM3Decoder
+};  // namespace rtcm3_ros
 
 #endif  // RTCM3_ROS_RTCM3_DECODER_H

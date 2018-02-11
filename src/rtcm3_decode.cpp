@@ -46,7 +46,7 @@ private:
 
   void cbStream(const rtcm3_ros::BinaryStream::ConstPtr &msg)
   {
-    dec_ << msg->data;
+    dec_ << rtcm3_ros::Buffer(msg->data);
   }
 
 public:

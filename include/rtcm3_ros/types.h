@@ -1,6 +1,7 @@
 #ifndef RTCM3_ROS_TYPES_H
 #define RTCM3_ROS_TYPES_H
 
+#include <utility>
 #include <ctime>
 
 namespace rtcm3_ros
@@ -96,7 +97,7 @@ public:
   {
     sec_ = psec_ = 0;
   }
-  Time(const uint64_t sec)
+  explicit Time(const uint64_t sec)
   {
     sec_ = sec;
     psec_ = 0;
@@ -150,7 +151,7 @@ public:
     week_ = week;
     tow_psec_ = tow_psec;
   }
-  GTime(const Time t)
+  explicit GTime(const Time t)
   {
     Time t2 = t;
     const std::pair<Time, int> leaps[] =
@@ -215,7 +216,7 @@ public:
   }
   static GTime from10bitsWeek(const uint64_t week)
   {
-    GTime now = Time::now();
+    GTime now = GTime(Time::now());
     if (now.week_ < 1560)
       now.week_ = 1560;
 
