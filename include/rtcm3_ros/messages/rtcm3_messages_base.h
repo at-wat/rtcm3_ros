@@ -13,25 +13,39 @@ class RTCM3MessageBase
 {
 public:
   using Ptr = std::shared_ptr<RTCM3MessageBase>;
+  enum Category
+  {
+    EPHEMERIDES,
+    PSEUDO_RANGE
+  };
   virtual int getType() const = 0;
+  virtual int getCategory() const = 0;
   virtual bool decode(const Buffer &) = 0;
 };
 
 class RTCM3MessageEphemeridesBase : public RTCM3MessageBase
 {
 public:
+  using Ptr = std::shared_ptr<RTCM3MessageEphemeridesBase>;
   virtual int getType() const = 0;
+  int getCategory() const
+  {
+    return Category::EPHEMERIDES;
+  }
   virtual bool decode(const Buffer &) = 0;
   virtual ECEF getPos(const GTime &time) const = 0;
+  virtual int getSatId() const = 0;
 };
 
 class RTCM3MessagePseudoRangeBase : public RTCM3MessageBase
 {
-protected:
-  int station_;
-
 public:
+  using Ptr = std::shared_ptr<RTCM3MessagePseudoRangeBase>;
   virtual int getType() const = 0;
+  int getCategory() const
+  {
+    return Category::PSEUDO_RANGE;
+  }
   virtual bool decode(const Buffer &) = 0;
 };
 

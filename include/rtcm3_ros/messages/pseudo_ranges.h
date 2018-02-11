@@ -8,6 +8,8 @@ namespace rtcm3_ros
 class RTCM3MessagePseudoRangeMsm : public RTCM3MessagePseudoRangeBase
 {
 protected:
+  // station id
+  int station_;
   // issue of data station
   uint8_t iod_;
   // cumulative session transmitting time
@@ -88,6 +90,9 @@ public:
 class RTCM3MessagePseudoRangeMsm7 : public RTCM3MessagePseudoRangeMsm
 {
 protected:
+  GTime stamp_;
+  std::map<int, PseudoRange> ranges_;
+
 public:
   constexpr int getType() const
   {
@@ -119,7 +124,7 @@ public:
           1.191795e9  // E5a+b
         };
 
-    double tow = buf.getUnsignedBits(24 + 12 + 12, 30) * 0.001;
+    const double tow = buf.getUnsignedBits(24 + 12 + 12, 30) * 0.001;
     const GTime stamp = GTime::fromTow(tow);
 
     size_t i = decodeHeader(buf);
@@ -186,6 +191,8 @@ public:
       ROS_INFO(" - sat(%d), sig(%d): pseudo_range=%0.3lf, phase_range=%0.3lf, doppler=%0.1lf",
                satsig.first.first, satsig.first.second,
                pseudo_range, phase_range, doppler_shift);
+
+      ranges_[satsig.first.first] = PseudoRange(stamp, snr, 0, 0, pseudo_range, phase_range, doppler_shift);
     }
 
     return true;

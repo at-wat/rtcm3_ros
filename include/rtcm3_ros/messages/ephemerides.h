@@ -109,12 +109,14 @@ public:
     i += 1;
     fit_ = buf.getUnsignedBits(i, 1) ? 0.0 : 4.0;  // 0:4hr, 1:>4hr
 
+    sat_ = prn - 1;
+
     week_ = GTime::from10bitsWeek(week);
     toe_ = GTime::fromTow(toes * 1000000000000, week_);
     toc_ = GTime::fromTow(toc * 1000000000000, week_);
     A_ = sqrtA * sqrtA;
 
-    const auto pos = getPos(toe_);
+    const auto pos = getPos(GTime(Time::now()));
     ROS_WARN(" - [prn: %d] %0.3lf, %0.3lf, %0.3lf", prn, pos.x(), pos.y(), pos.z());
     return true;
   }
@@ -162,7 +164,7 @@ public:
         2.0 * sqrt(mu * A_) * e_ * sinE / pow(CLIGHT, 2.0);
     return pos;
   }
-  double getVariance()
+  double getVariance() const
   {
     const double URA_VALUE[] = {
       2.4, 3.4, 4.85, 6.85,
@@ -174,6 +176,10 @@ public:
       return pow(6144.8, 2.0);
     return pow(URA_VALUE[sva_], 2.0);
   }
+  int getSatId() const
+  {
+    return sat_;
+  };
 };
 
 };  // namespace rtcm3_ros

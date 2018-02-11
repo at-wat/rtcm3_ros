@@ -227,35 +227,34 @@ public:
   }
   Duration operator-(const GTime &in) const
   {
-    if (static_cast<int64_t>(week_) - static_cast<int64_t>(in.week_) != 0)
-    {
-      throw std::runtime_error("Different week");
-    }
     return Duration(
-        0.0,
+        week_ - in.week_,
         static_cast<int64_t>(tow_psec_) - static_cast<int64_t>(in.tow_psec_));
   }
 };
 
-class PsudoRange
+class PseudoRange
 {
 protected:
-  Time time_;
-  float snr_;
+  GTime time_;
+  double snr_;
   int8_t lli_;
   int8_t code_;
   double phase_;
-  double psudo_range_;
+  double pseudo_range_;
   double doppler_frequency_;
 
 public:
-  PsudoRange(
-      const Time time,
-      const float snr,
+  PseudoRange()
+  {
+  }
+  PseudoRange(
+      const GTime time,
+      const double snr,
       const int8_t lli,
       const int8_t code,
+      const double pseudo_range,
       const double phase,
-      const double psudo_range,
       const double doppler_frequency)
   {
     time_ = time;
@@ -263,7 +262,7 @@ public:
     lli_ = lli;
     code_ = code;
     phase_ = phase;
-    psudo_range_ = psudo_range;
+    pseudo_range_ = pseudo_range;
     doppler_frequency_ = doppler_frequency;
   }
 };

@@ -49,6 +49,7 @@ class RTCM3Decoder
 protected:
   Loader decoders_;
   Buffer raw_buffer_;
+  std::map<int, rtcm3_ros::RTCM3MessageEphemeridesBase::Ptr> ephemerides_;
 
 public:
   RTCM3Decoder()
@@ -90,15 +91,26 @@ public:
   void decodeOneMessage(const Buffer &msg)
   {
     const int type = msg.getUnsignedBits(24, 12);
-    ROS_INFO("RTCM3: message type %d", type);
+    ROS_DEBUG("RTCM3: message type %d", type);
     try
     {
       auto decoder = decoders_.loadClass(type);
       decoder->decode(msg);
+      switch (decoder->getCategory())
+      {
+        case RTCM3MessageBase::Category::EPHEMERIDES:
+        {
+          RTCM3MessageEphemeridesBase::Ptr eph = std::dynamic_pointer_cast<RTCM3MessageEphemeridesBase>(decoder);
+          ephemerides_[eph->getSatId()] = eph;
+        }
+        break;
+        case RTCM3MessageBase::Category::PSEUDO_RANGE:
+          break;
+      }
     }
     catch (std::runtime_error &e)
     {
-      ROS_WARN("%s", e.what());
+      ROS_DEBUG("%s", e.what());
     }
   }
 };
