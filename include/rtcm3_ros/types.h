@@ -6,6 +6,12 @@
 
 namespace rtcm3_ros
 {
+class LatLonHeight;
+class ECEF;
+
+class GTime;
+class Time;
+
 class ECEF
 {
 protected:
@@ -26,6 +32,7 @@ public:
     , z_(z)
   {
   }
+  explicit ECEF(const LatLonHeight &llh);
   double x() const
   {
     return x_;
@@ -39,9 +46,53 @@ public:
     return z_;
   }
 };
+class LatLonHeight
+{
+protected:
+  double lat_;
+  double lon_;
+  double height_;
 
-class GTime;
-class Time;
+public:
+  LatLonHeight()
+    : lat_(0.0)
+    , lon_(0.0)
+    , height_(0.0)
+  {
+  }
+  LatLonHeight(const double lat, const double lon, const double height)
+  {
+    lat_ = lat;
+    lon_ = lon;
+    height_ = height;
+  }
+  explicit LatLonHeight(const ECEF &ecef);
+  double lat() const
+  {
+    return lat_;
+  }
+  double lon() const
+  {
+    return lon_;
+  }
+  double height() const
+  {
+    return height_;
+  }
+};
+
+ECEF::ECEF(const LatLonHeight &llh)
+{
+  x_ = llh.height() * cos(llh.lat()) * cos(llh.lon());
+  y_ = llh.height() * cos(llh.lat()) * sin(llh.lon());
+  z_ = llh.height() * sin(llh.lat());
+}
+LatLonHeight::LatLonHeight(const ECEF &ecef)
+{
+  lat_ = atan2(ecef.y(), ecef.x());
+  lon_ = atan2(ecef.z(), sqrt(pow(ecef.x(), 2) + pow(ecef.y(), 2)));
+  height_ = sqrt(pow(ecef.x(), 2) + pow(ecef.y(), 2) + pow(ecef.z(), 2));
+}
 
 class Duration
 {
