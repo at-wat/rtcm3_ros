@@ -1,11 +1,19 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="ip" default="127.0.0.1" />
-  <arg name="port" default="8020" />
+  <arg name="use_src1" default="true" />
+  <arg name="ip1" default="127.0.0.1" />
+  <arg name="port1" default="8020" />
+  <arg name="use_src2" default="false" />
+  <arg name="ip2" default="127.0.0.1" />
+  <arg name="port2" default="8021" />
 
-  <node name="rtcm3" pkg="rtcm3_ros" type="rtcm3" respawn="true">
-    <param name="ip" value="$(arg ip)" />
-    <param name="port" value="$(arg port)" />
+  <node name="rtcm3" pkg="rtcm3_ros" type="rtcm3" respawn="true" if="$(arg use_src1)">
+    <param name="ip" value="$(arg ip1)" />
+    <param name="port" value="$(arg port1)" />
+  </node>
+  <node name="rtcm3_2" pkg="rtcm3_ros" type="rtcm3" respawn="true" if="$(arg use_src2)">
+    <param name="ip" value="$(arg ip2)" />
+    <param name="port" value="$(arg port2)" />
   </node>
   <node name="rtcm3_dec" pkg="rtcm3_ros" type="rtcm3_decode" respawn="true" output="screen">
   </node>
