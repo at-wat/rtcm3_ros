@@ -26,7 +26,9 @@ generate_messages(
 )
 
 catkin_package(
-  DEPENDS
+  INCLUDE_DIRS
+    include
+  CATKIN_DEPENDS
     roscpp
     std_msgs
     geometry_msgs
@@ -58,4 +60,8 @@ install(TARGETS
     rtcm3_decode
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(DIRECTORY
+    include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
