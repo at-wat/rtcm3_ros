@@ -108,7 +108,11 @@ public:
   {
     sec_ = psec_ = 0;
   }
-  Duration(int64_t sec, int64_t psec)
+  Duration(const double sec)
+  {
+    *this = Duration(0, static_cast<int64_t>(sec * SEC));
+  }
+  Duration(const int64_t sec, const int64_t psec)
   {
     if (psec < 0)
     {
@@ -286,6 +290,10 @@ public:
     return Duration(
         week_ - in.week_,
         static_cast<int64_t>(tow_psec_) - static_cast<int64_t>(in.tow_psec_));
+  }
+  GTime operator+(const Duration &in) const
+  {
+    return GTime(week_, tow_psec_ + in.sec_ * SEC + in.psec_);
   }
 };
 
