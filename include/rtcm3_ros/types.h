@@ -132,6 +132,10 @@ public:
   {
     return static_cast<double>(sec_) + psec_ * 1e-12;
   }
+  Duration operator+(const Duration &a) const
+  {
+    return Duration(sec_ + a.sec_, psec_ + a.psec_);
+  }
 };
 
 class Time
@@ -250,10 +254,6 @@ public:
     GTime time(t0);
     ret.week_ = time.week_;
     ret.tow_psec_ = tow_psec;
-    if (ret.tow_psec_ < time.tow_psec_ - 302400 * SEC)
-      ret.tow_psec_ += 604800 * SEC;
-    else if (ret.tow_psec_ > time.tow_psec_ + 302400 * SEC)
-      ret.tow_psec_ -= 604800 * SEC;
 
     return ret;
   }
@@ -262,10 +262,6 @@ public:
     GTime ret;
     ret.week_ = t0.week_;
     ret.tow_psec_ = tow_psec;
-    if (ret.tow_psec_ < t0.tow_psec_ - 302400 * SEC)
-      ret.tow_psec_ += 604800 * SEC;
-    else if (ret.tow_psec_ > t0.tow_psec_ + 302400 * SEC)
-      ret.tow_psec_ -= 604800 * SEC;
 
     return ret;
   }
@@ -280,6 +276,10 @@ public:
   double getTow() const
   {
     return static_cast<double>(tow_psec_) / static_cast<double>(SEC);
+  }
+  uint64_t getWeek() const
+  {
+    return week_;
   }
   Duration operator-(const GTime &in) const
   {

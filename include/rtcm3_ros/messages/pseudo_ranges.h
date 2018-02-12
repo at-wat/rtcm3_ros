@@ -129,19 +129,29 @@ public:
           1.191795e9  // E5a+b
         };
 
-    const double tow = buf.getUnsignedBits(24 + 12 + 12, 30) * 0.001;
+    const GTime now = GTime(Time::now());
+    double tow = buf.getUnsignedBits(24 + 12 + 12, 30) * 0.001;
+    if (tow < now.getTow() - 302400.0)
+      tow += 604800.0;
+    else if (tow > now.getTow() + 302400.0)
+      tow -= 604800.0;
     const GTime stamp = GTime::fromTow(tow);
 
     size_t i = decodeHeader(buf);
     ROS_DEBUG("paseudo_ranges: sats: %ld, sigs: %ld, tow: %0.3lf", sats_.size(), sigs_.size(), stamp.getTow());
 
+    std::map<size_t, bool> error_status;
     std::map<size_t, double> pseudo_range_base;
     for (auto &sat : sats_)
     {
-      pseudo_range_base[sat] = buf.getUnsignedBits(i, 8) * RANGE_MS;
+      const auto pseudo_range_base_raw = buf.getUnsignedBits(i, 8);
+      if (pseudo_range_base_raw == 255)
+        error_status[sat] = true;
+      else
+        error_status[sat] = false;
+      pseudo_range_base[sat] = pseudo_range_base_raw * RANGE_MS;
       i += 8;
     }
-    // Decode extended info
     std::map<int, unsigned int> ex;
     for (auto &sat : sats_)
     {
@@ -150,13 +160,17 @@ public:
     }
     for (auto &sat : sats_)
     {
-      pseudo_range_base[sat] += buf.getUnsignedBits(i, 10) * P2_10 * RANGE_MS;
+      const auto pseudo_range_base_raw = buf.getUnsignedBits(i, 10);
+      pseudo_range_base[sat] += pseudo_range_base_raw * pow(2.0, -10.0) * RANGE_MS;
       i += 10;
     }
     std::map<size_t, double> phase_range_rate_base;
     for (auto &sat : sats_)
     {
-      phase_range_rate_base[sat] += buf.getSignedBits(i, 14) * 1.0;
+      const auto phase_range_rate_base_raw = buf.getSignedBits(i, 14);
+      if (phase_range_rate_base_raw == -8192)
+        error_status[sat] = true;
+      phase_range_rate_base[sat] = phase_range_rate_base_raw * 1.0;
       i += 14;
     }
 
@@ -170,11 +184,15 @@ public:
     for (auto &satsig : cellmask_)
     {
       const auto pseudo_range_raw = buf.getSignedBits(i_pseudo_range, 20);
-      const double pseudo_range = pseudo_range_raw * P2_29 * RANGE_MS +
-                                  pseudo_range_base[satsig.first.first];
+      if (pseudo_range_raw == -524288)
+        error_status[satsig.first.first] = true;
+      const double pseudo_range =
+          pseudo_range_base[satsig.first.first] + pseudo_range_raw * pow(2.0, -29.0) * RANGE_MS;
       i_pseudo_range += 20;
       const auto phase_range_raw = buf.getSignedBits(i_phase_range, 24);
-      const double phase_range = phase_range_raw * P2_31 * RANGE_MS;
+      if (phase_range_raw == -8388608)
+        error_status[satsig.first.first] = true;
+      const double phase_range = phase_range_raw * pow(2.0, -31.0) * RANGE_MS;
       i_phase_range += 24;
       const auto lock_time = buf.getUnsignedBits(i_lock_time, 10);
       i_lock_time += 10;
@@ -184,8 +202,10 @@ public:
       const double snr = snr_raw * 0.0625 * 4.0;
       i_cnr += 10;
       const auto phase_range_rate_raw = buf.getSignedBits(i_phase_range_rate, 15);
-      const double phase_range_rate = -phase_range_rate_raw * 0.0001 +
-                                      phase_range_rate_base[satsig.first.first];
+      if (phase_range_rate_raw == -16384)
+        error_status[satsig.first.first] = true;
+      const double phase_range_rate =
+          phase_range_rate_base[satsig.first.first] + phase_range_rate_raw * 0.0001;
       i_phase_range_rate += 15;
 
       const double base_frequency =
@@ -193,6 +213,8 @@ public:
       const double wave_length = CLIGHT / base_frequency;
       const double doppler_shift = phase_range_rate / wave_length;
 
+      if (error_status[satsig.first.first])
+        continue;
       ROS_DEBUG(" - sat(%d), sig(%d): pseudo_range=%0.3lf, phase_range=%0.3lf, doppler=%0.1lf",
                 satsig.first.first, satsig.first.second,
                 pseudo_range, phase_range, doppler_shift);
