@@ -1,0 +1,5 @@
+Header header
+
+uint32 satellite_id
+geometry_msgs/Point satellite_position
+rtcm3_ros/PseudoRange range

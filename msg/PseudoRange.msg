@@ -1,0 +1,3 @@
+float64 pseudo_range
+float64 phase_range
+float64 doppler_frequency

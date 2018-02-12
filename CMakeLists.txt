@@ -1,14 +1,35 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rtcm3_ros)
 
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation)
+find_package(
+  catkin
+  REQUIRED
+  COMPONENTS
+    roscpp
+    std_msgs
+    geometry_msgs
+    message_generation
+)
 find_package(Boost 1.53 REQUIRED system)
 
-add_message_files(FILES BinaryStream.msg)
-generate_messages(DEPENDENCIES std_msgs)
+add_message_files(
+  FILES
+    BinaryStream.msg
+    PseudoRange.msg
+    Observation.msg
+    ObservationArray.msg
+)
+generate_messages(
+  DEPENDENCIES
+    std_msgs
+    geometry_msgs
+)
 
 catkin_package(
-    DEPENDS roscpp std_msgs
+  DEPENDS
+    roscpp
+    std_msgs
+    geometry_msgs
 )
 
 include(CheckCXXCompilerFlag)

@@ -29,6 +29,7 @@
 
 #include <ros/ros.h>
 #include <rtcm3_ros/BinaryStream.h>
+#include <rtcm3_ros/ObservationArray.h>
 
 #include <rtcm3_ros/rtcm3_decoder.h>
 
@@ -40,6 +41,7 @@ private:
   ros::NodeHandle pnh_;
   ros::NodeHandle nh_;
   ros::Subscriber sub_stream_;
+  ros::Publisher pub_observations_;
   std::map<std::string, ros::Publisher> pub_;
 
   rtcm3_ros::RTCM3Decoder dec_;
@@ -48,11 +50,22 @@ private:
   {
     dec_ << rtcm3_ros::Buffer(msg->data);
   }
+  void cbObservations(const std::vector<rtcm3_ros::Observation> &observations)
+  {
+    rtcm3_ros::ObservationArray array;
+    array.header.stamp = ros::Time::now();
+    array.header.frame_id = "antenna";
+    array.observations = observations;
+
+    pub_observations_.publish(array);
+  }
 
 public:
   RTCM3Decode()
   {
     sub_stream_ = nh_.subscribe("rtcm3", 10, &RTCM3Decode::cbStream, this);
+    pub_observations_ = nh_.advertise<rtcm3_ros::ObservationArray>("observations", 10);
+    dec_.registerObservationsCallback(boost::bind(&RTCM3Decode::cbObservations, this, _1));
   }
 };
 

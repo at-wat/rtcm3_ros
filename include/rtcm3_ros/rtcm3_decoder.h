@@ -5,6 +5,7 @@
 #include <vector>
 #include <rtcm3_ros/buffer.h>
 #include <rtcm3_ros/rtcm3_messages.h>
+#include <rtcm3_ros/ObservationArray.h>
 
 namespace rtcm3_ros
 {
@@ -51,6 +52,8 @@ protected:
   Loader decoders_;
   Buffer raw_buffer_;
   std::map<int, rtcm3_ros::RTCM3MessageEphemeridesBase::Ptr> ephemerides_;
+  using ObservationCallback = std::function<void(const std::vector<rtcm3_ros::Observation> &)>;
+  ObservationCallback cb_observations_;
 
 public:
   RTCM3Decoder()
@@ -58,7 +61,10 @@ public:
     decoders_.registerClass<RTCM3MessageEphemeridesGps>();
     decoders_.registerClass<RTCM3MessagePseudoRangeMsm7>();
   }
-
+  void registerObservationsCallback(ObservationCallback cb_observations)
+  {
+    cb_observations_ = cb_observations;
+  }
   void operator<<(const Buffer &input)
   {
     const Buffer raw = raw_buffer_ + input;
@@ -109,6 +115,8 @@ public:
         {
           RTCM3MessagePseudoRangeBase::Ptr ranges = std::dynamic_pointer_cast<RTCM3MessagePseudoRangeBase>(decoder);
           ROS_INFO("---");
+
+          std::vector<rtcm3_ros::Observation> observations;
           for (auto &range : *ranges)
           {
             if (ephemerides_.find(range.first) != ephemerides_.end())
@@ -119,6 +127,16 @@ public:
                        range.second.getPseudoRange(),
                        range.second.getPhaseRange(),
                        sat_pos.x(), sat_pos.y(), sat_pos.z());
+
+              rtcm3_ros::Observation observation;
+              observation.satellite_id = range.first;
+              observation.satellite_position.x = sat_pos.x();
+              observation.satellite_position.y = sat_pos.y();
+              observation.satellite_position.z = sat_pos.z();
+              observation.range.pseudo_range = range.second.getPseudoRange();
+              observation.range.phase_range = range.second.getPhaseRange();
+              observation.range.doppler_frequency = range.second.getDopplerFrequency();
+              observations.push_back(observation);
             }
             else
             {
@@ -127,6 +145,10 @@ public:
                        range.second.getPseudoRange(),
                        range.second.getPhaseRange());
             }
+          }
+          if (cb_observations_ && observations.size() > 0)
+          {
+            cb_observations_(observations);
           }
           break;
         }

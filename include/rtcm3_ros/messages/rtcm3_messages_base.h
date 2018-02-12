@@ -41,7 +41,7 @@ class RTCM3MessagePseudoRangeBase : public RTCM3MessageBase
 {
 public:
   using Ptr = std::shared_ptr<RTCM3MessagePseudoRangeBase>;
-  using Container = std::map<int, PseudoRange>;
+  using Container = std::map<int, Range>;
 
   virtual int getType() const = 0;
   int getCategory() const

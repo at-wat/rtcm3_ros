@@ -289,7 +289,7 @@ public:
   }
 };
 
-class PseudoRange
+class Range
 {
 protected:
   GTime time_;
@@ -301,10 +301,10 @@ protected:
   double doppler_frequency_;
 
 public:
-  PseudoRange()
+  Range()
   {
   }
-  PseudoRange(
+  Range(
       const GTime time,
       const double snr,
       const int8_t lli,
@@ -338,6 +338,7 @@ public:
     return doppler_frequency_;
   }
 };
+
 };  // namespace rtcm3_ros
 
 #endif  // RTCM3_ROS_TYPES_H

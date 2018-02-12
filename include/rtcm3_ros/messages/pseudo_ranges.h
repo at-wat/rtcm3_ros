@@ -197,7 +197,7 @@ public:
                 satsig.first.first, satsig.first.second,
                 pseudo_range, phase_range, doppler_shift);
 
-      ranges_[satsig.first.first] = PseudoRange(stamp, snr, 0, 0, pseudo_range, phase_range, doppler_shift);
+      ranges_[satsig.first.first] = Range(stamp, snr, 0, 0, pseudo_range, phase_range, doppler_shift);
     }
 
     return true;
