@@ -33,6 +33,7 @@ public:
     return Category::EPHEMERIDES;
   }
   virtual bool decode(const Buffer &) = 0;
+  virtual double getClockBias(const GTime &time) const = 0;
   virtual ECEF getPos(const GTime &time) const = 0;
   virtual int getSatId() const = 0;
 };

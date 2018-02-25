@@ -95,7 +95,6 @@ public:
 class RTCM3MessagePseudoRangeMsm7 : public RTCM3MessagePseudoRangeMsm
 {
 protected:
-  GTime stamp_;
   Container ranges_;
 
 public:
@@ -181,6 +180,7 @@ public:
     int i_half = i_lock_time + cellmask_.size() * 10;
     int i_cnr = i_half + cellmask_.size() * 1;
     int i_phase_range_rate = i_cnr + cellmask_.size() * 10;
+    ranges_.clear();
     for (auto &satsig : cellmask_)
     {
       const auto pseudo_range_raw = buf.getSignedBits(i_pseudo_range, 20);

@@ -122,11 +122,13 @@ public:
             if (ephemerides_.find(range.first) != ephemerides_.end())
             {
               const ECEF sat_pos = ephemerides_[range.first]->getPos(range.second.getTime());
-              ROS_INFO("[%2d] r: %10.1f, p: %6.1f, sat: (%11.1f, %11.1f, %11.1f)",
+              const double dts = ephemerides_[range.first]->getClockBias(range.second.getTime());
+              ROS_INFO("[%2d] r: %10.1f, p: %6.1f, sat: (%11.1f, %11.1f, %11.1f), dts: %0.6f",
                        range.first,
                        range.second.getPseudoRange(),
                        range.second.getPhaseRange(),
-                       sat_pos.x(), sat_pos.y(), sat_pos.z());
+                       sat_pos.x(), sat_pos.y(), sat_pos.z(),
+                       dts);
 
               rtcm3_ros::Observation observation;
               observation.satellite_id = range.first;
@@ -136,6 +138,7 @@ public:
               observation.range.pseudo_range = range.second.getPseudoRange();
               observation.range.phase_range = range.second.getPhaseRange();
               observation.range.doppler_frequency = range.second.getDopplerFrequency();
+              observation.clock_bias = dts;
               observations.push_back(observation);
             }
             else

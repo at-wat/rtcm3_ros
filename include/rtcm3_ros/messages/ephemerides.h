@@ -118,14 +118,35 @@ public:
 
     return true;
   }
+  double getClockBias(const GTime &time) const
+  {
+    double E, Ek;
+    int n;
+    const Duration tk = time - toe_;
+    const Duration tk_toc = time - toc_;
+
+    const double mu = MU_GPS;
+
+    const double M = M0_ + (sqrt(mu / (A_ * A_ * A_)) + deln_) * tk.toSec();
+    for (n = 0, E = M, Ek = 0.0; fabs(E - Ek) > 1e-14 && n < 30; n++)
+    {
+      Ek = E;
+      E -= (E - e_ * sin(E) - M) / (1.0 - e_ * cos(E));
+    }
+    if (n == 30)
+      ROS_ERROR("Kepler iteration doesn't converged");
+    const double sinE = sin(E);
+
+    return f0_ + f1_ * tk_toc.toSec() + f2_ * tk_toc.toSec() * tk_toc.toSec() -
+           2.0 * sqrt(mu * A_) * e_ * sinE / pow(CLIGHT, 2.0);
+  }
   ECEF getPos(const GTime &time) const
   {
     double E, Ek, u, r, i;
     int n;
     const Duration tk = time - toe_;
-    const Duration tk_toc = time - toc_;
 
-    ROS_WARN("tk %0.3lf", tk.toSec());
+    ROS_DEBUG("tk %0.3lf", tk.toSec());
 
     const double mu = MU_GPS;
     const double omge = OMGE;
@@ -161,9 +182,6 @@ public:
         x * sinO + y * cosi * cosO,
         y * sin(i));
 
-    const double dts =
-        f0_ + f1_ * tk_toc.toSec() + f2_ * tk_toc.toSec() * tk_toc.toSec() -
-        2.0 * sqrt(mu * A_) * e_ * sinE / pow(CLIGHT, 2.0);
     return pos;
   }
   double getVariance() const
