@@ -184,13 +184,15 @@ public:
   }
   static Time now()
   {
+#ifndef ROSCPP_ROS_H
     timespec start;
     clock_gettime(CLOCK_REALTIME, &start);
 
-    Time now;
-    now.sec_ = start.tv_sec;
-    now.psec_ = start.tv_nsec * 1000;
-    return now;
+    return Time(start.tv_sec, start.tv_nsec * 1000);
+#else
+    ros::Time rostime = ros::Time::now();
+    return Time(rostime.sec, rostime.nsec * 1000);
+#endif
   }
 };
 class GTime
