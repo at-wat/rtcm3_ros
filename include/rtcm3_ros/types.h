@@ -345,6 +345,10 @@ public:
   {
     return doppler_frequency_;
   }
+  double getSNR() const
+  {
+    return snr_;
+  }
 };
 
 };  // namespace rtcm3_ros

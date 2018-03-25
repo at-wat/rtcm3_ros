@@ -198,8 +198,8 @@ public:
       i_lock_time += 10;
       const auto half = buf.getUnsignedBits(i_half, 1);
       i_half += 1;
-      const auto snr_raw = buf.getSignedBits(i_cnr, 10);
-      const double snr = snr_raw * 0.0625 * 4.0;
+      const auto snr_raw = buf.getUnsignedBits(i_cnr, 10);
+      const double snr = snr_raw * 0.0625;
       i_cnr += 10;
       const auto phase_range_rate_raw = buf.getSignedBits(i_phase_range_rate, 15);
       if (phase_range_rate_raw == -16384)

@@ -138,6 +138,7 @@ public:
               observation.range.pseudo_range = range.second.getPseudoRange();
               observation.range.phase_range = range.second.getPhaseRange();
               observation.range.doppler_frequency = range.second.getDopplerFrequency();
+              observation.range.snr = range.second.getSNR();
               observation.clock_bias = dts;
               observations.push_back(observation);
             }
