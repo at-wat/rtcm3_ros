@@ -51,6 +51,10 @@ add_executable(rtcm3 src/rtcm3.cpp)
 target_link_libraries(rtcm3 ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(rtcm3 rtcm3_ros_generate_messages)
 
+add_executable(rtcm3_server src/rtcm3_server.cpp)
+target_link_libraries(rtcm3_server ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(rtcm3_server rtcm3_ros_generate_messages)
+
 add_executable(rtcm3_decode src/rtcm3_decode.cpp)
 target_link_libraries(rtcm3_decode ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(rtcm3_decode rtcm3_ros_generate_messages)
