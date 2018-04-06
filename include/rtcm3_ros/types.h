@@ -309,6 +309,8 @@ protected:
   double phase_;
   double pseudo_range_;
   double doppler_frequency_;
+  double base_frequency_;
+  double wave_length_;
 
 public:
   Range()
@@ -321,15 +323,19 @@ public:
       const int8_t code,
       const double pseudo_range,
       const double phase,
-      const double doppler_frequency)
+      const double doppler_frequency,
+      const double base_frequency,
+      const double wave_length)
+    : time_(time)
+    , snr_(snr)
+    , lli_(lli)
+    , code_(code)
+    , pseudo_range_(pseudo_range)
+    , phase_(phase)
+    , doppler_frequency_(doppler_frequency)
+    , base_frequency_(base_frequency)
+    , wave_length_(wave_length)
   {
-    time_ = time;
-    snr_ = snr;
-    lli_ = lli;
-    code_ = code;
-    phase_ = phase;
-    pseudo_range_ = pseudo_range;
-    doppler_frequency_ = doppler_frequency;
   }
   GTime getTime() const
   {
@@ -339,13 +345,21 @@ public:
   {
     return pseudo_range_;
   }
-  double getPhaseRange() const
+  double getPhaseCycle() const
   {
     return phase_;
   }
   double getDopplerFrequency() const
   {
     return doppler_frequency_;
+  }
+  double getBaseFrequency() const
+  {
+    return base_frequency_;
+  }
+  double getWaveLength() const
+  {
+    return wave_length_;
   }
   double getSNR() const
   {

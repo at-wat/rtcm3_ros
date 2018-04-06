@@ -1,4 +1,7 @@
 float64 pseudo_range
-float64 phase_range
+float64 phase_cycle
 float64 doppler_frequency
+float64 wave_length
+float64 base_frequency
+float64 code_frequency
 float32 snr

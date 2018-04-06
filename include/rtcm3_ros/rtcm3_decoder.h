@@ -126,7 +126,7 @@ public:
               ROS_INFO("[%2d] r: %10.1f, p: %6.1f, sat: (%11.1f, %11.1f, %11.1f), dts: %0.6f",
                        range.first,
                        range.second.getPseudoRange(),
-                       range.second.getPhaseRange(),
+                       range.second.getPhaseCycle(),
                        sat_pos.x(), sat_pos.y(), sat_pos.z(),
                        dts);
 
@@ -136,8 +136,10 @@ public:
               observation.satellite_position.y = sat_pos.y();
               observation.satellite_position.z = sat_pos.z();
               observation.range.pseudo_range = range.second.getPseudoRange();
-              observation.range.phase_range = range.second.getPhaseRange();
+              observation.range.phase_cycle = range.second.getPhaseCycle();
               observation.range.doppler_frequency = range.second.getDopplerFrequency();
+              observation.range.base_frequency = range.second.getBaseFrequency();
+              observation.range.wave_length = range.second.getWaveLength();
               observation.range.snr = range.second.getSNR();
               observation.clock_bias = dts;
               observations.push_back(observation);
@@ -147,7 +149,7 @@ public:
               ROS_INFO("[%2d] r: %10.1f, p: %6.1f, no ephemerides",
                        range.first,
                        range.second.getPseudoRange(),
-                       range.second.getPhaseRange());
+                       range.second.getPhaseCycle());
             }
           }
           if (cb_observations_ && observations.size() > 0)

@@ -212,17 +212,21 @@ public:
           GPS_BAND_FREQUENCIES[SIGNAL_TYPE_BANDS[satsig.first.first]];
       const double wave_length = CLIGHT / base_frequency;
       const double doppler_shift = phase_range_rate / wave_length;
+      const double phase_cycle =
+          (pseudo_range_base[satsig.first.first] + phase_range) / wave_length;
 
       if (error_status[satsig.first.first])
         continue;
-      ROS_DEBUG(" - sat(%d), sig(%d): pseudo_range=%0.3lf, phase_range=%0.3lf, doppler=%0.1lf",
+      ROS_DEBUG(" - sat(%d), sig(%d): pseudo_range=%0.3lf, "
+                "phase_range=%0.3lf, doppler=%0.1lf",
                 satsig.first.first, satsig.first.second,
                 pseudo_range, phase_range, doppler_shift);
 
       ranges_[satsig.first.first] = Range(
           stamp + Duration(-pseudo_range / CLIGHT),
           snr, 0, 0,
-          pseudo_range, phase_range, doppler_shift);
+          pseudo_range, phase_cycle, doppler_shift,
+          base_frequency, wave_length);
     }
 
     return true;

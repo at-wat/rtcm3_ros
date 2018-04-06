@@ -26,6 +26,6 @@
   <node name="rtcm3_srv" pkg="rtcm3_ros" type="rtcm3_server" respawn="true" output="screen" if="$(arg use_log)">
   </node>
 
-  <node pkg="rosbag" type="record" name="record" args="-o gnss -b 1 /rosout /rtcm3" unless="$(arg use_log)" />
-  <node pkg="rosbag" type="play" name="play" args="--clock $(arg bag_file)" if="$(arg use_log)" />
+  <node pkg="rosbag" type="record" name="record" args="-o gnss -b 1 /rtcm3" unless="$(arg use_log)" />
+  <node pkg="rosbag" type="play" name="play" args="--clock -s 24 $(arg bag_file)" if="$(arg use_log)" />
 </launch>
