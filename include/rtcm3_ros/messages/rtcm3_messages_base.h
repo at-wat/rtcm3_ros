@@ -62,6 +62,24 @@ public:
   }
 };
 
+class RTCM3MessageCorrectionsBase : public RTCM3MessageBase
+{
+protected:
+  static constexpr double UPDATE_INTERVAL[16] = {
+    1, 2, 5, 10, 15, 30, 60, 120, 240, 300, 600, 900, 1800, 3600, 7200, 10800
+  };
+
+public:
+  using Ptr = std::shared_ptr<RTCM3MessageCorrectionsBase>;
+  virtual int getType() const = 0;
+  int getCategory() const
+  {
+    return Category::EPHEMERIDES;
+  }
+  virtual bool decode(const Buffer &) = 0;
+  virtual double getClockBias(const GTime &time) const = 0;
+};
+
 };  // namespace rtcm3_ros
 
 #endif  // RTCM3_ROS_MESSAGES_RTCM3_MESSAGES_BASE_H

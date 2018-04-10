@@ -60,6 +60,7 @@ public:
   {
     decoders_.registerClass<RTCM3MessageEphemeridesGps>();
     decoders_.registerClass<RTCM3MessagePseudoRangeMsm7>();
+    decoders_.registerClass<RTCM3MessageCorrectionsOrbitGPS>();
   }
   void registerObservationsCallback(ObservationCallback cb_observations)
   {

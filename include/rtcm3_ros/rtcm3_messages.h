@@ -4,6 +4,7 @@
 #include <map>
 
 #include <rtcm3_ros/messages/rtcm3_messages_base.h>
+#include <rtcm3_ros/messages/corrections.h>
 #include <rtcm3_ros/messages/ephemerides.h>
 #include <rtcm3_ros/messages/pseudo_ranges.h>
 
