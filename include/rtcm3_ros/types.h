@@ -128,13 +128,13 @@ public:
   {
     if (psec < 0)
     {
-      const int carry = static_cast<int64_t>(-psec / SEC);
-      sec_ = sec - carry;
-      psec_ = psec + SEC * carry;
+      const int64_t carry = psec / SEC;
+      sec_ = sec + carry;
+      psec_ = psec - SEC * carry;
     }
     else if (psec >= SEC)
     {
-      const int carry = static_cast<int64_t>(-psec / SEC);
+      const int64_t carry = psec / SEC;
       sec_ = sec + carry;
       psec_ = psec - SEC * carry;
     }
@@ -143,6 +143,16 @@ public:
       sec_ = sec;
       psec_ = psec;
     }
+  }
+  Duration normalized()
+  {
+    Duration ret = *this;
+    while (ret.sec_ > 302400)
+      ret.sec_ -= 604800;
+    while (ret.sec_ < -302400)
+      ret.sec_ += 604800;
+
+    return ret;
   }
   double toSec() const
   {

@@ -116,12 +116,7 @@ public:
           1.191795e9  // E5a+b
         };
 
-    const GTime now = GTime(Time::now());
-    double tow = buf.getUnsignedBitsConst(24 + 12 + 12, 30) * 0.001;
-    if (tow < now.getTow() - 302400.0)
-      tow += 604800.0;
-    else if (tow > now.getTow() + 302400.0)
-      tow -= 604800.0;
+    const double tow = buf.getUnsignedBitsConst(24 + 12 + 12, 30) * 0.001;
     const GTime stamp = GTime::fromTow(tow);
 
     size_t i = decodeHeader(buf);

@@ -76,12 +76,7 @@ public:
     };
 
     size_t i = 24 + 12;
-    const GTime now = GTime(Time::now());
     double tow = buf.getUnsignedBits(i, 20) * 1.0;
-    if (tow < now.getTow() - 302400.0)
-      tow += 604800.0;
-    else if (tow > now.getTow() + 302400.0)
-      tow -= 604800.0;
     const GTime stamp = GTime::fromTow(tow);
     stamp_ = stamp;
 
@@ -135,7 +130,7 @@ public:
   {
     if (corrections_.find(sat_id) == corrections_.end())
       return false;
-    const auto t = stamp_ - time;
+    const auto t = (stamp_ - time).normalized();
     const double x = corrections_[sat_id].deph0_ + corrections_[sat_id].ddeph0_ * t.toSec();
     const double y = corrections_[sat_id].deph1_ + corrections_[sat_id].ddeph1_ * t.toSec();
     const double z = corrections_[sat_id].deph2_ + corrections_[sat_id].ddeph2_ * t.toSec();

@@ -93,7 +93,7 @@ public:
   {
     double E, Ek;
     int n;
-    const Duration tk = time - toe_;
+    const Duration tk = (time - toe_).normalized();
     const Duration tk_toc = time - toc_;
 
     const double mu = MU_GPS;
@@ -115,7 +115,7 @@ public:
   {
     double E, Ek, u, r, i;
     int n;
-    const Duration tk = time - toe_;
+    const Duration tk = (time - toe_).normalized();
 
     ROS_DEBUG("tk %0.3lf", tk.toSec());
 
