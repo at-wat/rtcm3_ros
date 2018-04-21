@@ -21,6 +21,8 @@ protected:
   unsigned int provider_id_;
   unsigned int solution_id_;
 
+  GTime stamp_;
+
   class OrbitCorrection
   {
   public:
@@ -59,9 +61,10 @@ protected:
     {
     }
   };
-  std::map<unsigned int, OrbitCorrection> corrections_;
+  std::map<size_t, OrbitCorrection> corrections_;
 
 public:
+  using Ptr = std::shared_ptr<RTCM3MessageCorrectionsOrbit>;
   int getCategory() const
   {
     return Category::CORRECTION_ORBIT;
@@ -80,6 +83,7 @@ public:
     else if (tow > now.getTow() + 302400.0)
       tow -= 604800.0;
     const GTime stamp = GTime::fromTow(tow);
+    stamp_ = stamp;
 
     const double update_interval = UPDATE_INTERVAL[buf.getUnsignedBits(i, 4)];
     const unsigned int sync = buf.getUnsignedBits(i, 1);
@@ -99,7 +103,7 @@ public:
     corrections_.clear();
     for (int j = 0; j < nsats; j++)
     {
-      const unsigned int sat_id = buf.getUnsignedBits(i, getNumSatBits());
+      const size_t sat_id = buf.getUnsignedBits(i, getNumSatBits());
       const unsigned int iode = buf.getUnsignedBits(i, getIodeBits());
       const unsigned int iodcrc = buf.getUnsignedBits(i, getIodcrcBits());
       const double deph0 = buf.getSignedBits(i, 22) * 1e-4;
@@ -127,32 +131,45 @@ public:
     }
     return true;
   }
-  double getClockBias(const GTime &time) const
+  bool correctOrbit(ECEF &pos, const size_t sat_id, const GTime &time)
   {
+    if (corrections_.find(sat_id) == corrections_.end())
+      return false;
+    const auto t = stamp_ - time;
+    const double x = corrections_[sat_id].deph0_ + corrections_[sat_id].ddeph0_ * t.toSec();
+    const double y = corrections_[sat_id].deph1_ + corrections_[sat_id].ddeph1_ * t.toSec();
+    const double z = corrections_[sat_id].deph2_ + corrections_[sat_id].ddeph2_ * t.toSec();
+    ROS_INFO("- correction [%ld] %0.3f, %0.3f, %0.3f",
+             sat_id, x, y, z);
+    pos.x() += x;
+    pos.y() += y;
+    pos.z() += z;
+
+    return true;
   }
 };
 class RTCM3MessageCorrectionsOrbitGPS : public RTCM3MessageCorrectionsOrbit
 {
 public:
-  constexpr int getType() const
+  int getType() const
   {
     return 1057;
   }
 
 protected:
-  constexpr int getNumSatBits() const
+  int getNumSatBits() const
   {
     return 6;
   }
-  constexpr int getIodeBits() const
+  int getIodeBits() const
   {
     return 8;
   }
-  constexpr int getIodcrcBits() const
+  int getIodcrcBits() const
   {
     return 0;
   }
-  constexpr int getPrnOffset() const
+  int getPrnOffset() const
   {
     return 0;
   }

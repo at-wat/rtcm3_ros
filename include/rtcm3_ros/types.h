@@ -45,6 +45,18 @@ public:
   {
     return z_;
   }
+  double &x()
+  {
+    return x_;
+  }
+  double &y()
+  {
+    return y_;
+  }
+  double &z()
+  {
+    return z_;
+  }
 };
 class LatLonHeight
 {

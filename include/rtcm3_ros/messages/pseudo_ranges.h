@@ -36,7 +36,6 @@ protected:
   uint8_t sync_;
 
 public:
-  virtual int getType() const = 0;
   virtual bool decode(const Buffer &buf) = 0;
   int decodeHeader(const Buffer &buf)
   {
@@ -87,7 +86,7 @@ protected:
   Container ranges_;
 
 public:
-  constexpr int getType() const
+  int getType() const
   {
     return 1077;
   }

@@ -2,7 +2,9 @@
 #define RTCM3_ROS_RTCM3_DECODER_H
 
 #include <map>
+#include <memory>
 #include <vector>
+
 #include <rtcm3_ros/buffer.h>
 #include <rtcm3_ros/rtcm3_messages.h>
 #include <rtcm3_ros/ObservationArray.h>
@@ -51,12 +53,17 @@ class RTCM3Decoder
 protected:
   Loader decoders_;
   Buffer raw_buffer_;
-  std::map<int, rtcm3_ros::RTCM3MessageEphemeridesBase::Ptr> ephemerides_;
+  std::map<int, RTCM3MessageEphemeridesBase::Ptr> ephemerides_;
+  RTCM3MessageCorrectionsOrbit::Ptr corrections_orbit_;
+
   using ObservationCallback = std::function<void(const std::vector<rtcm3_ros::Observation> &)>;
   ObservationCallback cb_observations_;
 
+  bool require_ssr_;
+
 public:
-  RTCM3Decoder()
+  RTCM3Decoder(const bool require_ssr = true)
+    : require_ssr_(require_ssr)
   {
     decoders_.registerClass<RTCM3MessageEphemeridesGps>();
     decoders_.registerClass<RTCM3MessagePseudoRangeMsm7>();
@@ -112,17 +119,30 @@ public:
           ephemerides_[eph->getSatId()] = eph;
           break;
         }
+        case RTCM3MessageBase::Category::CORRECTION_ORBIT:
+        {
+          corrections_orbit_ = std::dynamic_pointer_cast<RTCM3MessageCorrectionsOrbit>(decoder);
+          break;
+        }
         case RTCM3MessageBase::Category::PSEUDO_RANGE:
         {
           RTCM3MessagePseudoRangeBase::Ptr ranges = std::dynamic_pointer_cast<RTCM3MessagePseudoRangeBase>(decoder);
           ROS_INFO("---");
+          if (!corrections_orbit_ && require_ssr_)
+          {
+            ROS_INFO("skipping until receiving ssr");
+            break;
+          }
 
           std::vector<rtcm3_ros::Observation> observations;
           for (auto &range : *ranges)
           {
             if (ephemerides_.find(range.first) != ephemerides_.end())
             {
-              const ECEF sat_pos = ephemerides_[range.first]->getPos(range.second.getTime());
+              ECEF sat_pos = ephemerides_[range.first]->getPos(range.second.getTime());
+              if (!corrections_orbit_->correctOrbit(sat_pos, range.first, range.second.getTime()))
+                continue;
+
               const double dts = ephemerides_[range.first]->getClockBias(range.second.getTime());
               ROS_INFO("[%2d] r: %10.1f, p: %6.1f, sat: (%11.1f, %11.1f, %11.1f), dts: %0.6f",
                        range.first,

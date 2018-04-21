@@ -42,7 +42,7 @@ protected:
   double Adot_, ndot_;
 
 public:
-  constexpr int getType() const
+  int getType() const
   {
     return 1019;
   }

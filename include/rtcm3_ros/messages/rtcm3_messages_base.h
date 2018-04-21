@@ -29,7 +29,6 @@ class RTCM3MessageEphemeridesBase : public RTCM3MessageBase
 {
 public:
   using Ptr = std::shared_ptr<RTCM3MessageEphemeridesBase>;
-  virtual int getType() const = 0;
   int getCategory() const
   {
     return Category::EPHEMERIDES;
@@ -46,7 +45,6 @@ public:
   using Ptr = std::shared_ptr<RTCM3MessagePseudoRangeBase>;
   using Container = std::map<int, Range>;
 
-  virtual int getType() const = 0;
   int getCategory() const
   {
     return Category::PSEUDO_RANGE;
@@ -68,7 +66,6 @@ class RTCM3MessageCorrectionsBase : public RTCM3MessageBase
 {
 public:
   using Ptr = std::shared_ptr<RTCM3MessageCorrectionsBase>;
-  virtual int getType() const = 0;
   virtual bool decode(const Buffer &) = 0;
 };
 
