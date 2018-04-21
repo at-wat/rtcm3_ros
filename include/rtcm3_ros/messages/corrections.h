@@ -80,22 +80,14 @@ public:
     else if (tow > now.getTow() + 302400.0)
       tow -= 604800.0;
     const GTime stamp = GTime::fromTow(tow);
-    i += 20;
 
     const double update_interval = UPDATE_INTERVAL[buf.getUnsignedBits(i, 4)];
-    i += 4;
     const unsigned int sync = buf.getUnsignedBits(i, 1);
-    i += 1;
     const unsigned int refd = buf.getUnsignedBits(i, 1);
-    i += 1;
     const unsigned int iod = buf.getUnsignedBits(i, 4);
-    i += 4;
     const unsigned int provider_id = buf.getUnsignedBits(i, 16);
-    i += 16;
     const unsigned int solution_id = buf.getUnsignedBits(i, 4);
-    i += 4;
     const unsigned int nsats = buf.getUnsignedBits(i, getNumSatBits());
-    i += getNumSatBits();
 
     ROS_DEBUG(
         "orbit_corrections: provider_id: %d, solution_id: %d, sats: %d, tow: %3f",
@@ -108,23 +100,14 @@ public:
     for (int j = 0; j < nsats; j++)
     {
       const unsigned int sat_id = buf.getUnsignedBits(i, getNumSatBits());
-      i += getNumSatBits();
       const unsigned int iode = buf.getUnsignedBits(i, getIodeBits());
-      i += getIodeBits();
       const unsigned int iodcrc = buf.getUnsignedBits(i, getIodcrcBits());
-      i += getIodcrcBits();
       const double deph0 = buf.getSignedBits(i, 22) * 1e-4;
-      i += 22;
       const double deph1 = buf.getSignedBits(i, 20) * 4e-4;
-      i += 20;
       const double deph2 = buf.getSignedBits(i, 20) * 4e-4;
-      i += 20;
       const double ddeph0 = buf.getSignedBits(i, 21) * 1e-6;
-      i += 21;
       const double ddeph1 = buf.getSignedBits(i, 19) * 4e-6;
-      i += 19;
       const double ddeph2 = buf.getSignedBits(i, 19) * 4e-6;
-      i += 19;
 
       corrections_[sat_id] = OrbitCorrection(
           sat_id,

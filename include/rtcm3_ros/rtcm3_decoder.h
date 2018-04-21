@@ -81,7 +81,7 @@ public:
         raw_buffer_ = Buffer(it, raw.end());
         break;
       }
-      const size_t length = Buffer(it, it + 3).getUnsignedBits(14, 10);
+      const size_t length = Buffer(it, it + 3).getUnsignedBitsConst(14, 10);
       if (length + 3 + 3 > remain)
       {
         raw_buffer_ = Buffer(it, raw.end());
@@ -89,7 +89,7 @@ public:
       }
       const Buffer msg(it, it + 3 + length);
       const Buffer crc(it + 3 + length, it + 3 + length + 3);
-      if (msg.CRC24Q() != crc.getUnsignedBits(0, 24))
+      if (msg.CRC24Q() != crc.getUnsignedBitsConst(0, 24))
         continue;
 
       decodeOneMessage(msg);
@@ -98,7 +98,7 @@ public:
   }
   void decodeOneMessage(const Buffer &msg)
   {
-    const int type = msg.getUnsignedBits(24, 12);
+    const int type = msg.getUnsignedBitsConst(24, 12);
     ROS_DEBUG("RTCM3: message type %d", type);
     try
     {

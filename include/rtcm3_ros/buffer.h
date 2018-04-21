@@ -63,7 +63,29 @@ public:
     b.insert(b.end(), a.begin(), a.end());
     return b;
   }
-  unsigned int getUnsignedBits(const size_t pos, const size_t len) const
+  unsigned int getUnsignedBits(size_t &pos, const size_t len, const bool increment = true) const
+  {
+    unsigned int bits = 0;
+    for (size_t i = pos; i < pos + len; i++)
+    {
+      if (i >= size() * 8)
+        throw std::runtime_error("Buffer access violation");
+      bits = (bits << 1) + (((*this)[i / 8] >> (7 - i % 8)) & 1u);
+    }
+    if (increment)
+      pos += len;
+    return bits;
+  }
+  int getSignedBits(size_t &pos, const size_t len, const bool increment = true) const
+  {
+    unsigned int bits = getUnsignedBits(pos, len, increment);
+    if (!(bits & (1u << (len - 1))))
+    {
+      return static_cast<int>(bits);
+    }
+    return static_cast<int>(bits | (~0u << len));
+  }
+  unsigned int getUnsignedBitsConst(const size_t &pos, const size_t len) const
   {
     unsigned int bits = 0;
     for (size_t i = pos; i < pos + len; i++)
@@ -74,9 +96,9 @@ public:
     }
     return bits;
   }
-  int getSignedBits(const size_t pos, const size_t len) const
+  int getSignedBitsConst(const size_t &pos, const size_t len) const
   {
-    unsigned int bits = getUnsignedBits(pos, len);
+    unsigned int bits = getUnsignedBitsConst(pos, len);
     if (!(bits & (1u << (len - 1))))
     {
       return static_cast<int>(bits);

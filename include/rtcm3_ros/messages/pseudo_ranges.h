@@ -43,37 +43,27 @@ public:
     size_t i = 24 + 12;
 
     station_ = buf.getUnsignedBits(i, 12);
-    i += 12;
 
     // Sat system dependent part
     i += 30;
 
     // Common part
     sync_ = buf.getUnsignedBits(i, 1);
-    i += 1;
     iod_ = buf.getUnsignedBits(i, 3);
-    i += 3;
     time_s_ = buf.getUnsignedBits(i, 7);
-    i += 7;
     clk_str_ = buf.getUnsignedBits(i, 2);
-    i += 2;
     clk_ext_ = buf.getUnsignedBits(i, 2);
-    i += 2;
     smooth_ = buf.getUnsignedBits(i, 1);
-    i += 1;
     tint_s_ = buf.getUnsignedBits(i, 3);
-    i += 3;
     for (uint8_t j = 0; j < 64; j++)
     {
       const int mask = buf.getUnsignedBits(i, 1);
-      i += 1;
       if (mask)
         sats_.push_back(j);
     }
     for (uint8_t j = 0; j < 32; j++)
     {
       const int mask = buf.getUnsignedBits(i, 1);
-      i += 1;
       if (mask)
         sigs_.push_back(j);
     }
@@ -82,7 +72,6 @@ public:
       for (auto &sig : sigs_)
       {
         cellmask_[std::pair<uint8_t, uint8_t>(sat, sig)] = buf.getUnsignedBits(i, 1);
-        i += 1;
       }
     }
 
@@ -129,7 +118,7 @@ public:
         };
 
     const GTime now = GTime(Time::now());
-    double tow = buf.getUnsignedBits(24 + 12 + 12, 30) * 0.001;
+    double tow = buf.getUnsignedBitsConst(24 + 12 + 12, 30) * 0.001;
     if (tow < now.getTow() - 302400.0)
       tow += 604800.0;
     else if (tow > now.getTow() + 302400.0)
@@ -149,19 +138,16 @@ public:
       else
         error_status[sat] = false;
       pseudo_range_base[sat] = pseudo_range_base_raw * RANGE_MS;
-      i += 8;
     }
     std::map<int, unsigned int> ex;
     for (auto &sat : sats_)
     {
       ex[sat] = buf.getUnsignedBits(i, 4);
-      i += 4;
     }
     for (auto &sat : sats_)
     {
       const auto pseudo_range_base_raw = buf.getUnsignedBits(i, 10);
       pseudo_range_base[sat] += pseudo_range_base_raw * pow(2.0, -10.0) * RANGE_MS;
-      i += 10;
     }
     std::map<size_t, double> phase_range_rate_base;
     for (auto &sat : sats_)
@@ -170,16 +156,15 @@ public:
       if (phase_range_rate_base_raw == -8192)
         error_status[sat] = true;
       phase_range_rate_base[sat] = phase_range_rate_base_raw * 1.0;
-      i += 14;
     }
 
     // Decode per signal data
-    int i_pseudo_range = i;
-    int i_phase_range = i_pseudo_range + cellmask_.size() * 20;
-    int i_lock_time = i_phase_range + cellmask_.size() * 24;
-    int i_half = i_lock_time + cellmask_.size() * 10;
-    int i_cnr = i_half + cellmask_.size() * 1;
-    int i_phase_range_rate = i_cnr + cellmask_.size() * 10;
+    size_t i_pseudo_range = i;
+    size_t i_phase_range = i_pseudo_range + cellmask_.size() * 20;
+    size_t i_lock_time = i_phase_range + cellmask_.size() * 24;
+    size_t i_half = i_lock_time + cellmask_.size() * 10;
+    size_t i_cnr = i_half + cellmask_.size() * 1;
+    size_t i_phase_range_rate = i_cnr + cellmask_.size() * 10;
     ranges_.clear();
     for (auto &satsig : cellmask_)
     {
@@ -188,25 +173,19 @@ public:
         error_status[satsig.first.first] = true;
       const double pseudo_range =
           pseudo_range_base[satsig.first.first] + pseudo_range_raw * pow(2.0, -29.0) * RANGE_MS;
-      i_pseudo_range += 20;
       const auto phase_range_raw = buf.getSignedBits(i_phase_range, 24);
       if (phase_range_raw == -8388608)
         error_status[satsig.first.first] = true;
       const double phase_range = phase_range_raw * pow(2.0, -31.0) * RANGE_MS;
-      i_phase_range += 24;
       const auto lock_time = buf.getUnsignedBits(i_lock_time, 10);
-      i_lock_time += 10;
       const auto half = buf.getUnsignedBits(i_half, 1);
-      i_half += 1;
       const auto snr_raw = buf.getUnsignedBits(i_cnr, 10);
       const double snr = snr_raw * 0.0625;
-      i_cnr += 10;
       const auto phase_range_rate_raw = buf.getSignedBits(i_phase_range_rate, 15);
       if (phase_range_rate_raw == -16384)
         error_status[satsig.first.first] = true;
       const double phase_range_rate =
           phase_range_rate_base[satsig.first.first] + phase_range_rate_raw * 0.0001;
-      i_phase_range_rate += 15;
 
       const double base_frequency =
           GPS_BAND_FREQUENCIES[SIGNAL_TYPE_BANDS[satsig.first.first]];
