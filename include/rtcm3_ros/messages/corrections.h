@@ -71,26 +71,22 @@ public:
   }
   bool decode(const Buffer &buf)
   {
-    constexpr double UPDATE_INTERVAL[16] = {
-      1, 2, 5, 10, 15, 30, 60, 120, 240, 300, 600, 900, 1800, 3600, 7200, 10800
-    };
-
     size_t i = 24 + 12;
     double tow = buf.getUnsignedBits(i, 20) * 1.0;
     const GTime stamp = GTime::fromTow(tow);
     stamp_ = stamp;
 
-    const double update_interval = UPDATE_INTERVAL[buf.getUnsignedBits(i, 4)];
-    const unsigned int sync = buf.getUnsignedBits(i, 1);
-    const unsigned int refd = buf.getUnsignedBits(i, 1);
-    const unsigned int iod = buf.getUnsignedBits(i, 4);
-    const unsigned int provider_id = buf.getUnsignedBits(i, 16);
-    const unsigned int solution_id = buf.getUnsignedBits(i, 4);
+    update_interval_ = UPDATE_INTERVAL[buf.getUnsignedBits(i, 4)];
+    sync_ = buf.getUnsignedBits(i, 1);
+    refd_ = buf.getUnsignedBits(i, 1);
+    iod_ = buf.getUnsignedBits(i, 4);
+    provider_id_ = buf.getUnsignedBits(i, 16);
+    solution_id_ = buf.getUnsignedBits(i, 4);
     const unsigned int nsats = buf.getUnsignedBits(i, getNumSatBits());
 
     ROS_DEBUG(
         "orbit_corrections: provider_id: %d, solution_id: %d, sats: %d, tow: %3f",
-        provider_id, solution_id,
+        provider_id_, solution_id_,
         nsats,
         tow);
 
@@ -98,7 +94,7 @@ public:
     corrections_.clear();
     for (int j = 0; j < nsats; j++)
     {
-      const size_t sat_id = buf.getUnsignedBits(i, getNumSatBits());
+      const size_t sat_id = buf.getUnsignedBits(i, getNumSatBits()) + getPrnOffset();
       const unsigned int iode = buf.getUnsignedBits(i, getIodeBits());
       const unsigned int iodcrc = buf.getUnsignedBits(i, getIodcrcBits());
       const double deph0 = buf.getSignedBits(i, 22) * 1e-4;
@@ -163,6 +159,120 @@ protected:
   int getIodcrcBits() const
   {
     return 0;
+  }
+  int getPrnOffset() const
+  {
+    return 0;
+  }
+};
+
+class RTCM3MessageCorrectionsClock : public RTCM3MessageCorrectionsBase
+{
+protected:
+  virtual int getNumSatBits() const = 0;
+  virtual int getPrnOffset() const = 0;
+
+  double update_interval_;
+  unsigned int sync_;
+  unsigned int iod_;
+  unsigned int provider_id_;
+  unsigned int solution_id_;
+
+  GTime stamp_;
+
+  class ClockCorrection
+  {
+  public:
+    unsigned int sat_id_;
+    double dclk0_;
+    double dclk1_;
+    double dclk2_;
+
+    ClockCorrection()
+    {
+    }
+    ClockCorrection(
+        const unsigned int sat_id,
+        const double dclk0,
+        const double dclk1,
+        const double dclk2)
+      : sat_id_(sat_id)
+      , dclk0_(dclk0)
+      , dclk1_(dclk1)
+      , dclk2_(dclk2)
+    {
+    }
+  };
+  std::map<size_t, ClockCorrection> corrections_;
+
+public:
+  using Ptr = std::shared_ptr<RTCM3MessageCorrectionsClock>;
+  int getCategory() const
+  {
+    return Category::CORRECTION_CLOCK;
+  }
+  bool decode(const Buffer &buf)
+  {
+    size_t i = 24 + 12;
+    double tow = buf.getUnsignedBits(i, 20) * 1.0;
+    const GTime stamp = GTime::fromTow(tow);
+    stamp_ = stamp;
+
+    update_interval_ = UPDATE_INTERVAL[buf.getUnsignedBits(i, 4)];
+    sync_ = buf.getUnsignedBits(i, 1);
+    iod_ = buf.getUnsignedBits(i, 4);
+    provider_id_ = buf.getUnsignedBits(i, 16);
+    solution_id_ = buf.getUnsignedBits(i, 4);
+    const unsigned int nsats = buf.getUnsignedBits(i, getNumSatBits());
+
+    ROS_DEBUG(
+        "clock_corrections: provider_id: %d, solution_id: %d, sats: %d, tow: %3f",
+        provider_id_, solution_id_,
+        nsats,
+        tow);
+
+    // Decode per satellite
+    corrections_.clear();
+    for (int j = 0; j < nsats; j++)
+    {
+      const size_t sat_id = buf.getUnsignedBits(i, getNumSatBits()) + getPrnOffset();
+      const double dclk0 = buf.getSignedBits(i, 22) * 1e-4;
+      const double dclk1 = buf.getSignedBits(i, 21) * 1e-6;
+      const double dclk2 = buf.getSignedBits(i, 27) * 2e-8;
+
+      corrections_[sat_id] = ClockCorrection(
+          sat_id, dclk0, dclk1, dclk2);
+      ROS_DEBUG(
+          " - sat(%d): "
+          "dclk=(%0.6f, %0.6f, %0.6f)",
+          sat_id,
+          dclk0, dclk1, dclk2);
+    }
+  }
+  double getClockCorrections(const size_t sat_id, const GTime &time)
+  {
+    if (corrections_.find(sat_id) == corrections_.end())
+      return 0.0;
+    const auto t = (stamp_ - time).normalized();
+
+    return (corrections_[sat_id].dclk0_ +
+            corrections_[sat_id].dclk1_ * t.toSec() * t.toSec() +
+            corrections_[sat_id].dclk2_ * t.toSec()) /
+           CLIGHT;
+  }
+};
+class RTCM3MessageCorrectionsClockGPS : public RTCM3MessageCorrectionsClock
+{
+public:
+  int getType() const
+  {
+    return 1058;
+  }
+
+protected:
+  int getNumSatBits() const
+  {
+    return 6;
   }
   int getPrnOffset() const
   {

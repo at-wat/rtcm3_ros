@@ -55,6 +55,7 @@ protected:
   Buffer raw_buffer_;
   std::map<int, RTCM3MessageEphemeridesBase::Ptr> ephemerides_;
   RTCM3MessageCorrectionsOrbit::Ptr corrections_orbit_;
+  RTCM3MessageCorrectionsClock::Ptr corrections_clock_;
 
   using ObservationCallback = std::function<void(const std::vector<rtcm3_ros::Observation> &)>;
   ObservationCallback cb_observations_;
@@ -68,6 +69,7 @@ public:
     decoders_.registerClass<RTCM3MessageEphemeridesGps>();
     decoders_.registerClass<RTCM3MessagePseudoRangeMsm7>();
     decoders_.registerClass<RTCM3MessageCorrectionsOrbitGPS>();
+    decoders_.registerClass<RTCM3MessageCorrectionsClockGPS>();
   }
   void registerObservationsCallback(ObservationCallback cb_observations)
   {
@@ -124,11 +126,16 @@ public:
           corrections_orbit_ = std::dynamic_pointer_cast<RTCM3MessageCorrectionsOrbit>(decoder);
           break;
         }
+        case RTCM3MessageBase::Category::CORRECTION_CLOCK:
+        {
+          corrections_clock_ = std::dynamic_pointer_cast<RTCM3MessageCorrectionsClock>(decoder);
+          break;
+        }
         case RTCM3MessageBase::Category::PSEUDO_RANGE:
         {
           RTCM3MessagePseudoRangeBase::Ptr ranges = std::dynamic_pointer_cast<RTCM3MessagePseudoRangeBase>(decoder);
           ROS_INFO("---");
-          if (!corrections_orbit_ && require_ssr_)
+          if ((!corrections_orbit_ || !corrections_clock_) && require_ssr_)
           {
             ROS_INFO("skipping until receiving ssr");
             break;
@@ -143,7 +150,9 @@ public:
               if (!corrections_orbit_->correctOrbit(sat_pos, range.first, range.second.getTime()))
                 continue;
 
-              const double dts = ephemerides_[range.first]->getClockBias(range.second.getTime());
+              const double dts =
+                  ephemerides_[range.first]->getClockBias(range.second.getTime()) +
+                  corrections_clock_->getClockCorrections(range.first, range.second.getTime());
               ROS_INFO("[%2d] r: %10.1f, p: %6.1f, sat: (%11.1f, %11.1f, %11.1f), dts: %0.6f",
                        range.first,
                        range.second.getPseudoRange(),

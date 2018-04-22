@@ -62,6 +62,10 @@ public:
   }
 };
 
+static constexpr double UPDATE_INTERVAL[16] = {
+  1, 2, 5, 10, 15, 30, 60, 120, 240, 300, 600, 900, 1800, 3600, 7200, 10800
+};
+
 class RTCM3MessageCorrectionsBase : public RTCM3MessageBase
 {
 public:
