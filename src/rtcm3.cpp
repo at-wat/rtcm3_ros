@@ -141,8 +141,11 @@ public:
 
     ROS_INFO("Connecting to %s:%d", ip_.c_str(), port_);
 
-    boost::asio::ip::tcp::endpoint endpoint(
-        boost::asio::ip::address::from_string(ip_), port_);
+    boost::asio::ip::tcp::resolver resolver(io_service_);
+    boost::asio::ip::tcp::resolver::query dns_query(ip_, std::to_string(port_));
+    boost::asio::ip::tcp::resolver::iterator dns_iter = resolver.resolve(dns_query);
+    boost::asio::ip::tcp::endpoint endpoint = dns_iter->endpoint();
+
     timer_.expires_from_now(boost::posix_time::seconds(10.0));
     timer_.async_wait(
         boost::bind(&RTCM3Node::onTimeoutConnect, this,
