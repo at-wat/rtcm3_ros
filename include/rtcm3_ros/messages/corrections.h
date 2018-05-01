@@ -111,7 +111,7 @@ public:
           deph0, deph1, deph2,
           ddeph0, ddeph1, ddeph2);
       ROS_DEBUG(
-          " - sat(%d): iode=%d, iodcrc=%d, "
+          " - sat(%ld): iode=%d, iodcrc=%d, "
           "deph=(%0.3f, %0.3f, %0.3f), "
           "ddeph=(%0.3f, %0.3f, %0.3f)",
           sat_id,
@@ -243,7 +243,7 @@ public:
       corrections_[sat_id] = ClockCorrection(
           sat_id, dclk0, dclk1, dclk2);
       ROS_DEBUG(
-          " - sat(%d): "
+          " - sat(%ld): "
           "dclk=(%0.6f, %0.6f, %0.6f)",
           sat_id,
           dclk0, dclk1, dclk2);
