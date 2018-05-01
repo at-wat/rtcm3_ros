@@ -2,6 +2,7 @@
 <launch>
   <arg name="use_log" default="false" />
   <arg name="bag_file" default="$(find rtcm3_ros)/sample/sample.bag" />
+  <arg name="record_bag_dir" default="" />
   <arg name="use_src1" default="true" />
   <arg name="ip1" default="127.0.0.1" />
   <arg name="port1" default="8020" />
@@ -26,6 +27,6 @@
   <node name="rtcm3_srv" pkg="rtcm3_ros" type="rtcm3_server" respawn="true" output="screen" if="$(arg use_log)">
   </node>
 
-  <node pkg="rosbag" type="record" name="record" args="-o gnss -b 1 /rtcm3" unless="$(arg use_log)" />
+  <node pkg="rosbag" type="record" name="record" args="-o $(arg record_bag_dir)gnss -b 1 /rtcm3" unless="$(arg use_log)" />
   <node pkg="rosbag" type="play" name="play" args="--clock -s 24 $(arg bag_file)" if="$(arg use_log)" />
 </launch>
