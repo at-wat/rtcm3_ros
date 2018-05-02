@@ -134,10 +134,10 @@ public:
         case RTCM3MessageBase::Category::PSEUDO_RANGE:
         {
           RTCM3MessagePseudoRangeBase::Ptr ranges = std::dynamic_pointer_cast<RTCM3MessagePseudoRangeBase>(decoder);
-          ROS_INFO("---");
+          ROS_DEBUG("---");
           if ((!corrections_orbit_ || !corrections_clock_) && require_ssr_)
           {
-            ROS_INFO("skipping until receiving ssr");
+            ROS_DEBUG("skipping until receiving ssr");
             break;
           }
 
@@ -153,12 +153,12 @@ public:
               const double dts =
                   ephemerides_[range.first]->getClockBias(range.second.getTime()) +
                   corrections_clock_->getClockCorrections(range.first, range.second.getTime());
-              ROS_INFO("[%2d] r: %10.1f, p: %6.1f, sat: (%11.1f, %11.1f, %11.1f), dts: %0.6f",
-                       range.first,
-                       range.second.getPseudoRange(),
-                       range.second.getPhaseCycle(),
-                       sat_pos.x(), sat_pos.y(), sat_pos.z(),
-                       dts);
+              ROS_DEBUG("[%2d] r: %10.1f, p: %6.1f, sat: (%11.1f, %11.1f, %11.1f), dts: %0.6f",
+                        range.first,
+                        range.second.getPseudoRange(),
+                        range.second.getPhaseCycle(),
+                        sat_pos.x(), sat_pos.y(), sat_pos.z(),
+                        dts);
 
               rtcm3_ros::Observation observation;
               observation.satellite_id = range.first;
@@ -176,10 +176,10 @@ public:
             }
             else
             {
-              ROS_INFO("[%2d] r: %10.1f, p: %6.1f, no ephemerides",
-                       range.first,
-                       range.second.getPseudoRange(),
-                       range.second.getPhaseCycle());
+              ROS_DEBUG("[%2d] r: %10.1f, p: %6.1f, no ephemerides",
+                        range.first,
+                        range.second.getPseudoRange(),
+                        range.second.getPhaseCycle());
             }
           }
           if (cb_observations_ && observations.size() > 0)

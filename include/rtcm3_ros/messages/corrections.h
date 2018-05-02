@@ -130,8 +130,8 @@ public:
     const double x = corrections_[sat_id].deph0_ + corrections_[sat_id].ddeph0_ * t.toSec();
     const double y = corrections_[sat_id].deph1_ + corrections_[sat_id].ddeph1_ * t.toSec();
     const double z = corrections_[sat_id].deph2_ + corrections_[sat_id].ddeph2_ * t.toSec();
-    ROS_INFO("- correction [%ld] %0.3f, %0.3f, %0.3f",
-             sat_id, x, y, z);
+    ROS_DEBUG("- correction [%ld] %0.3f, %0.3f, %0.3f",
+              sat_id, x, y, z);
     pos.x() += x;
     pos.y() += y;
     pos.z() += z;
