@@ -99,7 +99,10 @@ public:
       const Buffer msg(it, it + 3 + length);
       const Buffer crc(it + 3 + length, it + 3 + length + 3);
       if (msg.CRC24Q() != crc.getUnsignedBitsConst(0, 24))
+      {
+        ROS_DEBUG("CRC missmatch (size: %lu)", length);
         continue;
+      }
 
       decodeOneMessage(msg);
       it += length;
@@ -137,7 +140,8 @@ public:
           ROS_DEBUG("---");
           if ((!corrections_orbit_ || !corrections_clock_) && require_ssr_)
           {
-            ROS_DEBUG("skipping until receiving ssr");
+            ROS_DEBUG("skipping until receiving ssr (orbit: %d, clock: %d)",
+                      corrections_orbit_ ? 1 : 0, corrections_clock_ ? 1 : 0);
             break;
           }
 

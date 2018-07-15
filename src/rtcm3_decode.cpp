@@ -63,8 +63,8 @@ private:
 public:
   RTCM3Decode()
   {
-    sub_stream_ = nh_.subscribe("rtcm3", 10, &RTCM3Decode::cbStream, this);
-    pub_observations_ = nh_.advertise<rtcm3_ros::ObservationArray>("observations", 10);
+    sub_stream_ = nh_.subscribe("rtcm3", 100, &RTCM3Decode::cbStream, this);
+    pub_observations_ = nh_.advertise<rtcm3_ros::ObservationArray>("observations", 100);
     dec_.registerObservationsCallback(boost::bind(&RTCM3Decode::cbObservations, this, _1));
   }
 };

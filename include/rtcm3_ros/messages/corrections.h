@@ -248,6 +248,7 @@ public:
           sat_id,
           dclk0, dclk1, dclk2);
     }
+    return true;
   }
   double getClockCorrections(const size_t sat_id, const GTime &time)
   {
