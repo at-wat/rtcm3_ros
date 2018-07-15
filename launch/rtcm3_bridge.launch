@@ -13,20 +13,34 @@
   <param name="use_sim_time" value="$(arg use_log)" />
 
   <group unless="$(arg use_log)">
-    <node name="rtcm3" pkg="rtcm3_ros" type="rtcm3" respawn="true" if="$(arg use_src1)">
+    <node name="rtcm3_0" pkg="rtcm3_ros" type="rtcm3" respawn="true" if="$(arg use_src1)">
       <param name="ip" value="$(arg ip1)" />
       <param name="port" value="$(arg port1)" />
+      <remap from="rtcm3" to="rtcm3_0" />
     </node>
-    <node name="rtcm3_2" pkg="rtcm3_ros" type="rtcm3" respawn="true" if="$(arg use_src2)">
+    <node name="rtcm3_1" pkg="rtcm3_ros" type="rtcm3" respawn="true" if="$(arg use_src2)">
       <param name="ip" value="$(arg ip2)" />
       <param name="port" value="$(arg port2)" />
+      <remap from="rtcm3" to="rtcm3_1" />
     </node>
   </group>
-  <node name="rtcm3_dec" pkg="rtcm3_ros" type="rtcm3_decode" respawn="true" output="screen">
+  <node name="rtcm3_dec_0" pkg="rtcm3_ros" type="rtcm3_decode" respawn="true" output="screen">
+    <remap from="rtcm3" to="rtcm3_0" />
   </node>
-  <node name="rtcm3_srv" pkg="rtcm3_ros" type="rtcm3_server" respawn="true" output="screen" if="$(arg use_log)">
+  <node name="rtcm3_dec_1" pkg="rtcm3_ros" type="rtcm3_decode" respawn="true" output="screen">
+    <remap from="rtcm3" to="rtcm3_1" />
+  </node>
+  <node name="rtcm3_srv_0" pkg="rtcm3_ros" type="rtcm3_server" respawn="true" output="screen" if="$(arg use_log)">
+    <remap from="rtcm3" to="rtcm3_0" />
+    <param name="port" value="$(arg port1)" />
+  </node>
+  <node name="rtcm3_srv_1" pkg="rtcm3_ros" type="rtcm3_server" respawn="true" output="screen" if="$(arg use_log)">
+    <remap from="rtcm3" to="rtcm3_1" />
+    <param name="port" value="$(arg port2)" />
   </node>
 
-  <node pkg="rosbag" type="record" name="record" args="-o $(arg record_bag_dir)gnss -b 1 /rtcm3" unless="$(arg use_log)" />
-  <node pkg="rosbag" type="play" name="play" args="--clock -s 24 $(arg bag_file)" if="$(arg use_log)" />
+  <node pkg="rosbag" type="record" name="record" args="-o $(arg record_bag_dir)gnss -b 1 /rtcm3_0 /rtcm3_1" unless="$(arg use_log)" output="screen" />
+  <node pkg="rosbag" type="play" name="play" args="--clock $(arg bag_file)" if="$(arg use_log)" output="screen">
+    <remap from="rtcm3" to="rtcm3_0" /> <!-- for compatibility -->
+  </node>
 </launch>
