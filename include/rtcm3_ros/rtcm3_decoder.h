@@ -52,7 +52,7 @@ class RTCM3Decoder
 {
 protected:
   Loader decoders_;
-  Buffer raw_buffer_;
+  std::vector<Buffer> raw_buffer_;
   std::map<int, RTCM3MessageEphemeridesBase::Ptr> ephemerides_;
   RTCM3MessageCorrectionsOrbit::Ptr corrections_orbit_;
   RTCM3MessageCorrectionsClock::Ptr corrections_clock_;
@@ -75,10 +75,13 @@ public:
   {
     cb_observations_ = cb_observations;
   }
-  void operator<<(const Buffer &input)
+  void process(const size_t id, const Buffer &input)
   {
-    const Buffer raw = raw_buffer_ + input;
-    raw_buffer_.clear();
+    if (raw_buffer_.size() <= id)
+      raw_buffer_.resize(id + 1);
+
+    const Buffer raw = raw_buffer_[id] + input;
+    raw_buffer_[id].clear();
 
     for (auto it = raw.begin(); it != raw.end(); ++it)
     {
@@ -87,13 +90,13 @@ public:
       const size_t remain = raw.end() - it;
       if (remain < 3)
       {
-        raw_buffer_ = Buffer(it, raw.end());
+        raw_buffer_[id] = Buffer(it, raw.end());
         break;
       }
       const size_t length = Buffer(it, it + 3).getUnsignedBitsConst(14, 10);
       if (length + 3 + 3 > remain)
       {
-        raw_buffer_ = Buffer(it, raw.end());
+        raw_buffer_[id] = Buffer(it, raw.end());
         break;
       }
       const Buffer msg(it, it + 3 + length);

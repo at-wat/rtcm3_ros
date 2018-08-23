@@ -26,11 +26,8 @@
       <remap from="rtcm3" to="rtcm3_1" />
     </node>
   </group>
-  <node name="rtcm3_dec_0" pkg="rtcm3_ros" type="rtcm3_decode" respawn="true" output="screen">
-    <remap from="rtcm3" to="rtcm3_0" />
-  </node>
-  <node name="rtcm3_dec_1" pkg="rtcm3_ros" type="rtcm3_decode" respawn="true" output="screen">
-    <remap from="rtcm3" to="rtcm3_1" />
+  <node name="rtcm3_dec" pkg="rtcm3_ros" type="rtcm3_decode" respawn="true" output="screen">
+    <param name="num_input" value="2" />
   </node>
   <node name="rtcm3_srv_0" pkg="rtcm3_ros" type="rtcm3_server" respawn="true" output="screen" if="$(arg use_log)">
     <remap from="rtcm3" to="rtcm3_0" />

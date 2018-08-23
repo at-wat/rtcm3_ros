@@ -40,15 +40,15 @@ class RTCM3Decode
 private:
   ros::NodeHandle pnh_;
   ros::NodeHandle nh_;
-  ros::Subscriber sub_stream_;
+  std::vector<ros::Subscriber> sub_stream_;
   ros::Publisher pub_observations_;
   std::map<std::string, ros::Publisher> pub_;
 
   rtcm3_ros::RTCM3Decoder dec_;
 
-  void cbStream(const rtcm3_ros::BinaryStream::ConstPtr &msg)
+  void cbStream(const rtcm3_ros::BinaryStream::ConstPtr &msg, const size_t stream_id)
   {
-    dec_ << rtcm3_ros::Buffer(msg->data);
+    dec_.process(stream_id, rtcm3_ros::Buffer(msg->data));
   }
   void cbObservations(const std::vector<rtcm3_ros::Observation> &observations)
   {
@@ -62,8 +62,26 @@ private:
 
 public:
   RTCM3Decode()
+    : nh_("")
+    , pnh_("~")
   {
-    sub_stream_ = nh_.subscribe("rtcm3", 100, &RTCM3Decode::cbStream, this);
+    int num_input;
+    pnh_.param("num_input", num_input, 1);
+    if (num_input == 1)
+    {
+      sub_stream_.push_back(
+          nh_.subscribe<rtcm3_ros::BinaryStream>(
+              "rtcm3", 100,
+              boost::bind(&RTCM3Decode::cbStream, this, _1, 0)));
+    }
+    else
+    {
+      for (int i = 0; i < num_input; ++i)
+        sub_stream_.push_back(
+            nh_.subscribe<rtcm3_ros::BinaryStream>(
+                "rtcm3_" + std::to_string(i), 100,
+                boost::bind(&RTCM3Decode::cbStream, this, _1, i)));
+    }
     pub_observations_ = nh_.advertise<rtcm3_ros::ObservationArray>("observations", 100);
     dec_.registerObservationsCallback(boost::bind(&RTCM3Decode::cbObservations, this, _1));
   }
