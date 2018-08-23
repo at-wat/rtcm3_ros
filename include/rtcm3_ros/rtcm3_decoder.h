@@ -153,8 +153,14 @@ public:
           {
             if (ephemerides_.find(range.first) != ephemerides_.end())
             {
-              ECEF sat_pos = ephemerides_[range.first]->getPos(range.second.getTime());
+              const Duration dt(0.001);
+              ECEF sat_pos =
+                  ephemerides_[range.first]->getPos(range.second.getTime());
+              ECEF sat_pos2 =
+                  ephemerides_[range.first]->getPos(range.second.getTime() + dt);
               if (!corrections_orbit_->correctOrbit(sat_pos, range.first, range.second.getTime()))
+                continue;
+              if (!corrections_orbit_->correctOrbit(sat_pos2, range.first, range.second.getTime() + dt))
                 continue;
 
               const double dts =
@@ -172,6 +178,9 @@ public:
               observation.satellite_position.x = sat_pos.x();
               observation.satellite_position.y = sat_pos.y();
               observation.satellite_position.z = sat_pos.z();
+              observation.satellite_velocity.x = (sat_pos2.x() - sat_pos.x()) / dt.toSec();
+              observation.satellite_velocity.y = (sat_pos2.y() - sat_pos.y()) / dt.toSec();
+              observation.satellite_velocity.z = (sat_pos2.z() - sat_pos.z()) / dt.toSec();
               observation.range.pseudo_range = range.second.getPseudoRange();
               observation.range.phase_cycle = range.second.getPhaseCycle();
               observation.range.doppler_frequency = range.second.getDopplerFrequency();

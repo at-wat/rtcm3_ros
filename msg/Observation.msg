@@ -2,5 +2,6 @@ Header header
 
 uint32 satellite_id
 geometry_msgs/Point satellite_position
+geometry_msgs/Vector3 satellite_velocity
 rtcm3_ros/PseudoRange range
 float64 clock_bias
