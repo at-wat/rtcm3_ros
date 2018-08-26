@@ -188,6 +188,7 @@ public:
               observation.range.wave_length = range.second.getWaveLength();
               observation.range.snr = range.second.getSNR();
               observation.clock_bias = dts;
+              observation.frequency = range.second.getBaseFrequency();
               observations.push_back(observation);
             }
             else
