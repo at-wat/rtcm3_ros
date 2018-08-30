@@ -7,6 +7,8 @@
 
 #include <rtcm3_ros/buffer.h>
 #include <rtcm3_ros/rtcm3_messages.h>
+
+#include <rtcm3_ros/IonosphericDelay.h>
 #include <rtcm3_ros/ObservationArray.h>
 
 namespace rtcm3_ros
@@ -56,9 +58,12 @@ protected:
   std::map<int, RTCM3MessageEphemeridesBase::Ptr> ephemerides_;
   RTCM3MessageCorrectionsOrbit::Ptr corrections_orbit_;
   RTCM3MessageCorrectionsClock::Ptr corrections_clock_;
+  IonoDelay iono_;
 
   using ObservationCallback = std::function<void(const std::vector<rtcm3_ros::Observation> &)>;
   ObservationCallback cb_observations_;
+  using IonoCallback = std::function<void(const std::vector<rtcm3_ros::IonosphericDelayGridPoint> &)>;
+  IonoCallback cb_iono_;
 
   bool require_ssr_;
 
@@ -70,10 +75,15 @@ public:
     decoders_.registerClass<RTCM3MessagePseudoRangeMsm7>();
     decoders_.registerClass<RTCM3MessageCorrectionsOrbitGPS>();
     decoders_.registerClass<RTCM3MessageCorrectionsClockGPS>();
+    decoders_.registerClass<RTCM3MessageSbas>();
   }
   void registerObservationsCallback(ObservationCallback cb_observations)
   {
     cb_observations_ = cb_observations;
+  }
+  void registerIonoCallback(IonoCallback cb_iono)
+  {
+    cb_iono_ = cb_iono;
   }
   void process(const size_t id, const Buffer &input)
   {
@@ -202,6 +212,25 @@ public:
           if (cb_observations_ && observations.size() > 0)
           {
             cb_observations_(observations);
+          }
+          break;
+        }
+        case RTCM3MessageBase::Category::SBAS:
+        {
+          RTCM3MessageSbas::Ptr sbas = std::dynamic_pointer_cast<RTCM3MessageSbas>(decoder);
+          sbas->persistent(iono_);
+          std::vector<rtcm3_ros::IonosphericDelayGridPoint> igps;
+          for (const auto &d : iono_)
+          {
+            rtcm3_ros::IonosphericDelayGridPoint igp;
+            igp.latitude = d.first.first;
+            igp.longitude = d.first.second;
+            igp.delay = d.second;
+            igps.push_back(igp);
+          }
+          if (cb_iono_ && igps.size() > 0)
+          {
+            cb_iono_(igps);
           }
           break;
         }

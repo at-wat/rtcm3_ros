@@ -7,5 +7,6 @@
 #include <rtcm3_ros/messages/corrections.h>
 #include <rtcm3_ros/messages/ephemerides.h>
 #include <rtcm3_ros/messages/pseudo_ranges.h>
+#include <rtcm3_ros/messages/sbas.h>
 
 #endif  // RTCM3_ROS_RTCM3_MESSAGES_H

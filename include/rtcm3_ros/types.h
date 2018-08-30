@@ -389,6 +389,209 @@ public:
   }
 };
 
+class IonoMask
+{
+protected:
+  uint32_t band_;
+  uint32_t iodi_;
+
+  std::vector<uint32_t> indice_;
+
+public:
+  IonoMask()
+    : band_(0)
+    , iodi_(-1)
+  {
+  }
+  IonoMask(
+      const uint32_t band,
+      const uint32_t iodi)
+    : band_(band)
+    , iodi_(iodi)
+  {
+  }
+  void addMask(const uint32_t id)
+  {
+    indice_.push_back(id);
+  }
+  uint32_t getId(const uint32_t num) const
+  {
+    return indice_[num];
+  }
+  uint32_t getIodi() const
+  {
+    return iodi_;
+  }
+  uint32_t getBand() const
+  {
+    return band_;
+  }
+};
+
+class IonoDelay
+{
+protected:
+  std::map<std::pair<int, int>, float> delay_;
+  std::map<uint32_t, IonoMask> masks_;
+
+  struct BandPart
+  {
+    int x_;
+    int y_begin_;
+    int y_interval_;
+    size_t grid_end_;
+  };
+  struct BandA
+  {
+    BandPart bands[8];
+  };
+  struct BandB
+  {
+    BandPart bands[5];
+  };
+  const BandA BAND_A[9] =
+      {
+        { { { -180, -75, 5, 28 },
+            { -175, -55, 5, 51 },
+            { -170, -75, 5, 78 },
+            { -165, -55, 5, 101 },
+            { -160, -75, 5, 128 },
+            { -155, -55, 5, 151 },
+            { -150, -75, 5, 178 },
+            { -145, -55, 5, 201 } } },  // band 0
+        { { { -140, -85, 5, 28 },
+            { -135, -55, 5, 51 },
+            { -130, -75, 5, 78 },
+            { -125, -55, 5, 101 },
+            { -120, -75, 5, 128 },
+            { -115, -55, 5, 151 },
+            { -110, -75, 5, 178 },
+            { -105, -55, 5, 201 } } },  // band1
+        { { { -100, -75, 5, 27 },
+            { -95, -55, 5, 50 },
+            { -90, -75, 5, 78 },
+            { -85, -55, 5, 101 },
+            { -80, -75, 5, 128 },
+            { -75, -55, 5, 151 },
+            { -70, -75, 5, 178 },
+            { -65, -55, 5, 201 } } },  // band2
+        { { { -60, -75, 5, 27 },
+            { -55, -55, 5, 50 },
+            { -50, -85, 5, 78 },
+            { -45, -55, 5, 101 },
+            { -40, -75, 5, 128 },
+            { -35, -55, 5, 151 },
+            { -30, -75, 5, 178 },
+            { -25, -55, 5, 201 } } },  // band3
+        { { { -20, -75, 5, 27 },
+            { -15, -55, 5, 50 },
+            { -10, -85, 5, 77 },
+            { -5, -55, 5, 100 },
+            { 0, -75, 5, 128 },
+            { 5, -55, 5, 151 },
+            { 10, -75, 5, 178 },
+            { 15, -55, 5, 201 } } },  // band4
+        { { { 20, -75, 5, 27 },
+            { 25, -55, 5, 50 },
+            { 30, -75, 5, 77 },
+            { 35, -55, 5, 100 },
+            { 40, -85, 5, 128 },
+            { 45, -55, 5, 151 },
+            { 50, -75, 5, 178 },
+            { 55, -55, 5, 201 } } },  // band5
+        { { { 60, -75, 5, 27 },
+            { 65, -55, 5, 50 },
+            { 70, -75, 5, 77 },
+            { 75, -55, 5, 100 },
+            { 80, -75, 5, 127 },
+            { 85, -55, 5, 150 },
+            { 90, -75, 5, 178 },
+            { 95, -55, 5, 201 } } },  // band6
+        { { { 100, -75, 5, 27 },
+            { 105, -55, 5, 50 },
+            { 110, -75, 5, 77 },
+            { 115, -55, 5, 100 },
+            { 120, -75, 5, 127 },
+            { 125, -55, 5, 150 },
+            { 130, -85, 5, 178 },
+            { 135, -55, 5, 201 } } },  // band7
+        { { { 140, -75, 5, 27 },
+            { 145, -55, 5, 50 },
+            { 150, -75, 5, 77 },
+            { 155, -55, 5, 100 },
+            { 160, -75, 5, 127 },
+            { 165, -55, 5, 150 },
+            { 170, -85, 5, 177 },
+            { 175, -55, 5, 200 } } }  // band8
+      };
+  const BandB BAND_B[2] =
+      {
+        { { { 60, -180, 5, 72 },
+            { 65, -180, 10, 108 },
+            { 70, -180, 10, 144 },
+            { 75, -180, 10, 180 },
+            { 85, -180, 30, 192 } } },  // band 9
+        { { { -60, -180, 5, 72 },
+            { -65, -180, 10, 108 },
+            { -70, -180, 10, 144 },
+            { -75, -180, 10, 180 },
+            { -85, -170, 30, 192 } } }  // band 10
+      };
+
+public:
+  void updateDelay(
+      const uint32_t prn,
+      const uint32_t num,
+      const uint32_t iodi,
+      const float delay)
+  {
+    const auto mask = masks_.find(prn);
+    if (mask == masks_.end())
+      return;
+    if (mask->second.getIodi() != iodi)
+      return;
+    const uint32_t band = mask->second.getBand();
+    const uint32_t id = mask->second.getId(num);
+    size_t grid_start;
+    int x(0), y(0);
+    for (const auto &b : BAND_A[band].bands)
+    {
+      if (id < b.grid_end_)
+      {
+        x = b.x_;
+        y = b.y_begin_ + b.y_interval_ * (id - grid_start);
+        break;
+      }
+      grid_start = b.grid_end_;
+    }
+    int lat, lon;
+    if (band < 9)
+    {
+      lon = x;
+      lat = y;
+    }
+    else
+    {
+      lat = x;
+      lon = y;
+    }
+    delay_[std::pair<int, int>(lat, lon)] = delay;
+  }
+  void updateMask(
+      const uint32_t prn,
+      const IonoMask &mask)
+  {
+    masks_[prn] = mask;
+  }
+  decltype(delay_)::const_iterator begin() const
+  {
+    return delay_.begin();
+  }
+  decltype(delay_)::const_iterator end() const
+  {
+    return delay_.end();
+  }
+};
 };  // namespace rtcm3_ros
 
 #endif  // RTCM3_ROS_TYPES_H

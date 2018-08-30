@@ -18,7 +18,8 @@ public:
     CORRECTION_CLOCK,
     CORRECTION_ORBIT,
     EPHEMERIDES,
-    PSEUDO_RANGE
+    PSEUDO_RANGE,
+    SBAS
   };
   virtual int getType() const = 0;
   virtual int getCategory() const = 0;

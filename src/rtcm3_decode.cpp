@@ -30,6 +30,7 @@
 #include <ros/ros.h>
 #include <rtcm3_ros/BinaryStream.h>
 #include <rtcm3_ros/ObservationArray.h>
+#include <rtcm3_ros/IonosphericDelay.h>
 
 #include <rtcm3_ros/rtcm3_decoder.h>
 
@@ -42,7 +43,7 @@ private:
   ros::NodeHandle nh_;
   std::vector<ros::Subscriber> sub_stream_;
   ros::Publisher pub_observations_;
-  std::map<std::string, ros::Publisher> pub_;
+  ros::Publisher pub_iono_;
 
   rtcm3_ros::RTCM3Decoder dec_;
 
@@ -58,6 +59,15 @@ private:
     array.observations = observations;
 
     pub_observations_.publish(array);
+  }
+  void cbIono(const std::vector<rtcm3_ros::IonosphericDelayGridPoint> &igps)
+  {
+    rtcm3_ros::IonosphericDelay iono;
+    iono.header.stamp = ros::Time::now();
+    iono.header.frame_id = "earth";
+    iono.igps = igps;
+
+    pub_iono_.publish(iono);
   }
 
 public:
@@ -84,6 +94,9 @@ public:
     }
     pub_observations_ = nh_.advertise<rtcm3_ros::ObservationArray>("observations", 100);
     dec_.registerObservationsCallback(boost::bind(&RTCM3Decode::cbObservations, this, _1));
+
+    pub_iono_ = nh_.advertise<rtcm3_ros::IonosphericDelay>("iono", 100);
+    dec_.registerIonoCallback(boost::bind(&RTCM3Decode::cbIono, this, _1));
   }
 };
 

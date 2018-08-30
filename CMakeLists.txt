@@ -15,9 +15,11 @@ find_package(Boost 1.53 REQUIRED system)
 add_message_files(
   FILES
     BinaryStream.msg
-    PseudoRange.msg
+    IonosphericDelay.msg
+    IonosphericDelayGridPoint.msg
     Observation.msg
     ObservationArray.msg
+    PseudoRange.msg
 )
 generate_messages(
   DEPENDENCIES
