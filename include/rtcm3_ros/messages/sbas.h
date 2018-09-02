@@ -25,10 +25,10 @@ public:
   using Ptr = std::shared_ptr<RTCM3MessageSbas>;
   uint8_t sbas_type_;
 
-  uint8_t prn_;
   IonoMask mask_;
   std::map<size_t, float> delays_;
   uint32_t iodi_;
+  uint32_t band_;
 
   int getCategory() const
   {
@@ -44,13 +44,13 @@ public:
     {
       case 18:
       {
-        iono.updateMask(prn_, mask_);
+        iono.updateMask(band_, mask_);
         break;
       }
       case 26:
       {
         for (const auto &d : delays_)
-          iono.updateDelay(prn_, d.first, iodi_, d.second);
+          iono.updateDelay(band_, d.first, iodi_, d.second);
         break;
       }
     }
@@ -66,18 +66,17 @@ public:
     size_t pos = 8;
     sbas_type_ = buf.getUnsignedBits(pos, 6);
     ROS_DEBUG("SBAS %u, type: %u, size: %u", msg.prn, sbas_type_, buf.size());
-    prn_ = msg.prn;
-    pos = 18;
     switch (sbas_type_)
     {
       case 18:
       {
-        const uint32_t band = buf.getUnsignedBits(pos, 4);
+        pos = 18;
+        band_ = buf.getUnsignedBits(pos, 4);
         iodi_ = buf.getUnsignedBits(pos, 2);
-        IonoMask mask(band, iodi_);
+        IonoMask mask(band_, iodi_);
         std::stringstream ss;
         ss << "iono grid mask:" << std::endl;
-        ss << "  band: " << band << std::endl;
+        ss << "  band: " << band_ << std::endl;
         ss << "  iodi: " << iodi_ << std::endl;
         ss << "  mask: ";
         for (uint32_t i = 0; i < 201; ++i)
@@ -96,20 +95,24 @@ public:
       }
       case 26:
       {
+        pos = 14;
+        band_ = buf.getUnsignedBits(pos, 4);
         const uint32_t block = buf.getUnsignedBits(pos, 4);
         iodi_ = buf.getUnsignedBitsConst(217, 2);
         std::stringstream ss;
         ss << "iono delay:" << std::endl;
+        ss << "  band: " << band_ << std::endl;
         ss << "  block: " << block << std::endl;
         ss << "  iodi: " << iodi_ << std::endl;
         ss << "  delay: [";
         for (int i = 0; i < 15; ++i)
         {
+          const size_t index = block * 15 + i;
           const uint32_t delay_raw = buf.getUnsignedBits(pos, 9);
           const uint32_t give = buf.getUnsignedBits(pos, 4);
           const float delay = delay_raw == 0x1ff ? 0.0 : delay_raw * 0.125;
           ss << delay << " ";
-          delays_[block * 15 + i] = delay;
+          delays_[index] = delay;
         }
         ss << "]";
         ROS_DEBUG("%s", ss.str().c_str());

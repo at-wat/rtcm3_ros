@@ -426,6 +426,10 @@ public:
   {
     return band_;
   }
+  size_t size() const
+  {
+    return indice_.size();
+  }
 };
 
 class IonoDelay
@@ -434,154 +438,232 @@ protected:
   std::map<std::pair<int, int>, float> delay_;
   std::map<uint32_t, IonoMask> masks_;
 
+  struct YTable
+  {
+    size_t size_;
+    int y_[72];
+  };
+  const YTable Y_TABLE0 =
+      {
+        28,
+        { -75, -65, -55, -50, -45, -40, -35, -30, -25, -20,
+          -15, -10, -5, 0, 5, 10, 15, 20, 25, 30,
+          35, 40, 45, 50, 55, 65, 75, 85 }
+      };
+  const YTable Y_TABLE1 =
+      {
+        23,
+        { -55, -50, -45, -40, -35, -30, -25, -20, -15, -10,
+          -5, 0, 5, 10, 15, 20, 25, 30, 35, 40,
+          45, 50, 55 }
+      };
+  const YTable Y_TABLE2 =
+      {
+        27,
+        { -75, -65, -55, -50, -45, -40, -35, -30, -25, -20,
+          -15, -10, -5, 0, 5, 10, 15, 20, 25, 30,
+          35, 40, 45, 50, 55, 65, 75 }
+      };
+  const YTable Y_TABLE3 =
+      {
+        28,
+        { -85, -75, -65, -55, -50, -45, -40, -35, -30, -25,
+          -20, -15, -10, -5, 0, 5, 10, 15, 20, 25,
+          30, 35, 40, 45, 50, 55, 65, 75 }
+      };
+  const YTable Y_TABLE4 =
+      {
+        72,
+        { -180, -175, -170, -165, -160, -155, -150, -145, -140, -135,
+          -130, -125, -120, -115, -110, -105, -100, -95, -90, -85,
+          -80, -75, -70, -65, -60, -55, -50, -45, -40, -35,
+          -30, -25, -20, -15, -10, -5, 0, 5, 10, 15,
+          20, 25, 30, 35, 40, 45, 50, 55, 60, 65,
+          70, 75, 80, 85, 90, 95, 100, 105, 110, 115,
+          120, 125, 130, 135, 140, 145, 150, 155, 160, 165,
+          170, 175 }
+      };
+  const YTable Y_TABLE5 =
+      {
+        36,
+        { -180, -170, -160, -150, -140, -130, -120, -110, -100, -90,
+          -80, -70, -60, -50, -40, -30, -20, -10, 0, 10,
+          20, 30, 40, 50, 60, 70, 80, 90, 100, 110,
+          120, 130, 140, 150, 160, 170 }
+      };
+  const YTable Y_TABLE6 =
+      {
+        12,
+        { -180, -150, -120, -90, -60, -30, 0, 30, 60, 90,
+          120, 150 }
+      };
+  const YTable Y_TABLE7 =
+      {
+        12,
+        { -170, -140, -110, -80, -50, -20, 10, 40, 70, 100,
+          130, 160 }
+      };
   struct BandPart
   {
     int x_;
-    int y_begin_;
-    int y_interval_;
-    size_t grid_end_;
+    YTable const *y_;
   };
   struct BandA
   {
-    BandPart bands[8];
+    BandPart bands_[8];
   };
   struct BandB
   {
-    BandPart bands[5];
+    BandPart bands_[5];
   };
   const BandA BAND_A[9] =
       {
-        { { { -180, -75, 5, 28 },
-            { -175, -55, 5, 51 },
-            { -170, -75, 5, 78 },
-            { -165, -55, 5, 101 },
-            { -160, -75, 5, 128 },
-            { -155, -55, 5, 151 },
-            { -150, -75, 5, 178 },
-            { -145, -55, 5, 201 } } },  // band 0
-        { { { -140, -85, 5, 28 },
-            { -135, -55, 5, 51 },
-            { -130, -75, 5, 78 },
-            { -125, -55, 5, 101 },
-            { -120, -75, 5, 128 },
-            { -115, -55, 5, 151 },
-            { -110, -75, 5, 178 },
-            { -105, -55, 5, 201 } } },  // band1
-        { { { -100, -75, 5, 27 },
-            { -95, -55, 5, 50 },
-            { -90, -75, 5, 78 },
-            { -85, -55, 5, 101 },
-            { -80, -75, 5, 128 },
-            { -75, -55, 5, 151 },
-            { -70, -75, 5, 178 },
-            { -65, -55, 5, 201 } } },  // band2
-        { { { -60, -75, 5, 27 },
-            { -55, -55, 5, 50 },
-            { -50, -85, 5, 78 },
-            { -45, -55, 5, 101 },
-            { -40, -75, 5, 128 },
-            { -35, -55, 5, 151 },
-            { -30, -75, 5, 178 },
-            { -25, -55, 5, 201 } } },  // band3
-        { { { -20, -75, 5, 27 },
-            { -15, -55, 5, 50 },
-            { -10, -85, 5, 77 },
-            { -5, -55, 5, 100 },
-            { 0, -75, 5, 128 },
-            { 5, -55, 5, 151 },
-            { 10, -75, 5, 178 },
-            { 15, -55, 5, 201 } } },  // band4
-        { { { 20, -75, 5, 27 },
-            { 25, -55, 5, 50 },
-            { 30, -75, 5, 77 },
-            { 35, -55, 5, 100 },
-            { 40, -85, 5, 128 },
-            { 45, -55, 5, 151 },
-            { 50, -75, 5, 178 },
-            { 55, -55, 5, 201 } } },  // band5
-        { { { 60, -75, 5, 27 },
-            { 65, -55, 5, 50 },
-            { 70, -75, 5, 77 },
-            { 75, -55, 5, 100 },
-            { 80, -75, 5, 127 },
-            { 85, -55, 5, 150 },
-            { 90, -75, 5, 178 },
-            { 95, -55, 5, 201 } } },  // band6
-        { { { 100, -75, 5, 27 },
-            { 105, -55, 5, 50 },
-            { 110, -75, 5, 77 },
-            { 115, -55, 5, 100 },
-            { 120, -75, 5, 127 },
-            { 125, -55, 5, 150 },
-            { 130, -85, 5, 178 },
-            { 135, -55, 5, 201 } } },  // band7
-        { { { 140, -75, 5, 27 },
-            { 145, -55, 5, 50 },
-            { 150, -75, 5, 77 },
-            { 155, -55, 5, 100 },
-            { 160, -75, 5, 127 },
-            { 165, -55, 5, 150 },
-            { 170, -85, 5, 177 },
-            { 175, -55, 5, 200 } } }  // band8
+        { { { -180, &Y_TABLE0 },
+            { -175, &Y_TABLE1 },
+            { -170, &Y_TABLE2 },
+            { -165, &Y_TABLE1 },
+            { -160, &Y_TABLE2 },
+            { -155, &Y_TABLE1 },
+            { -150, &Y_TABLE2 },
+            { -145, &Y_TABLE1 } } },  // band 0
+        { { { -140, &Y_TABLE3 },
+            { -135, &Y_TABLE1 },
+            { -130, &Y_TABLE2 },
+            { -125, &Y_TABLE1 },
+            { -120, &Y_TABLE2 },
+            { -115, &Y_TABLE1 },
+            { -110, &Y_TABLE2 },
+            { -105, &Y_TABLE1 } } },  // band1
+        { { { -100, &Y_TABLE2 },
+            { -95, &Y_TABLE1 },
+            { -90, &Y_TABLE0 },
+            { -85, &Y_TABLE1 },
+            { -80, &Y_TABLE2 },
+            { -75, &Y_TABLE1 },
+            { -70, &Y_TABLE2 },
+            { -65, &Y_TABLE1 } } },  // band2
+        { { { -60, &Y_TABLE2 },
+            { -55, &Y_TABLE1 },
+            { -50, &Y_TABLE3 },
+            { -45, &Y_TABLE1 },
+            { -40, &Y_TABLE2 },
+            { -35, &Y_TABLE1 },
+            { -30, &Y_TABLE2 },
+            { -25, &Y_TABLE1 } } },  // band3
+        { { { -20, &Y_TABLE2 },
+            { -15, &Y_TABLE1 },
+            { -10, &Y_TABLE2 },
+            { -5, &Y_TABLE1 },
+            { 0, &Y_TABLE0 },
+            { 5, &Y_TABLE1 },
+            { 10, &Y_TABLE2 },
+            { 15, &Y_TABLE1 } } },  // band4
+        { { { 20, &Y_TABLE2 },
+            { 25, &Y_TABLE1 },
+            { 30, &Y_TABLE2 },
+            { 35, &Y_TABLE1 },
+            { 40, &Y_TABLE3 },
+            { 45, &Y_TABLE1 },
+            { 50, &Y_TABLE2 },
+            { 55, &Y_TABLE1 } } },  // band5
+        { { { 60, &Y_TABLE2 },
+            { 65, &Y_TABLE1 },
+            { 70, &Y_TABLE2 },
+            { 75, &Y_TABLE1 },
+            { 80, &Y_TABLE2 },
+            { 85, &Y_TABLE1 },
+            { 90, &Y_TABLE0 },
+            { 95, &Y_TABLE1 } } },  // band6
+        { { { 100, &Y_TABLE2 },
+            { 105, &Y_TABLE1 },
+            { 110, &Y_TABLE2 },
+            { 115, &Y_TABLE1 },
+            { 120, &Y_TABLE2 },
+            { 125, &Y_TABLE1 },
+            { 130, &Y_TABLE3 },
+            { 135, &Y_TABLE1 } } },  // band7
+        { { { 140, &Y_TABLE2 },
+            { 145, &Y_TABLE1 },
+            { 150, &Y_TABLE2 },
+            { 155, &Y_TABLE1 },
+            { 160, &Y_TABLE2 },
+            { 165, &Y_TABLE1 },
+            { 170, &Y_TABLE2 },
+            { 175, &Y_TABLE1 } } }  // band8
       };
   const BandB BAND_B[2] =
       {
-        { { { 60, -180, 5, 72 },
-            { 65, -180, 10, 108 },
-            { 70, -180, 10, 144 },
-            { 75, -180, 10, 180 },
-            { 85, -180, 30, 192 } } },  // band 9
-        { { { -60, -180, 5, 72 },
-            { -65, -180, 10, 108 },
-            { -70, -180, 10, 144 },
-            { -75, -180, 10, 180 },
-            { -85, -170, 30, 192 } } }  // band 10
+        { { { 60, &Y_TABLE4 },
+            { 65, &Y_TABLE5 },
+            { 70, &Y_TABLE5 },
+            { 75, &Y_TABLE5 },
+            { 85, &Y_TABLE6 } } },  // band 9
+        { { { -60, &Y_TABLE4 },
+            { -65, &Y_TABLE5 },
+            { -70, &Y_TABLE5 },
+            { -75, &Y_TABLE5 },
+            { -85, &Y_TABLE7 } } }  // band 10
       };
 
 public:
   void updateDelay(
-      const uint32_t prn,
+      const uint32_t band,
       const uint32_t num,
       const uint32_t iodi,
       const float delay)
   {
-    const auto mask = masks_.find(prn);
+    const auto mask = masks_.find(band);
     if (mask == masks_.end())
+      return;
+    if (num >= mask->second.size())
       return;
     if (mask->second.getIodi() != iodi)
       return;
-    const uint32_t band = mask->second.getBand();
     const uint32_t id = mask->second.getId(num);
-    size_t grid_start;
-    int x(0), y(0);
-    for (const auto &b : BAND_A[band].bands)
-    {
-      if (id < b.grid_end_)
-      {
-        x = b.x_;
-        y = b.y_begin_ + b.y_interval_ * (id - grid_start);
-        break;
-      }
-      grid_start = b.grid_end_;
-    }
     int lat, lon;
     if (band < 9)
     {
+      size_t grid_start = 0;
+      int x(0), y(0);
+      for (const auto &b : BAND_A[band].bands_)
+      {
+        const size_t grid_end = grid_start + b.y_->size_;
+        if (id < grid_end)
+        {
+          x = b.x_;
+          y = b.y_->y_[id - grid_start];
+          break;
+        }
+        grid_start = grid_end;
+      }
       lon = x;
       lat = y;
     }
     else
     {
+      size_t grid_start = 0;
+      int x(0), y(0);
+      for (const auto &b : BAND_B[band].bands_)
+      {
+        const size_t grid_end = grid_start + b.y_->size_;
+        if (id < grid_end)
+        {
+          x = b.x_;
+          y = b.y_->y_[id - grid_start];
+          break;
+        }
+        grid_start = grid_end;
+      }
       lat = x;
       lon = y;
     }
     delay_[std::pair<int, int>(lat, lon)] = delay;
   }
   void updateMask(
-      const uint32_t prn,
+      const uint32_t band,
       const IonoMask &mask)
   {
-    masks_[prn] = mask;
+    masks_[band] = mask;
   }
   decltype(delay_)::const_iterator begin() const
   {
