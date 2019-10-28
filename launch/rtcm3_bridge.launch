@@ -11,6 +11,7 @@
   <arg name="port2" default="8021" />
   <arg name="bag_rate" default="1.0" />
   <arg name="bag_skip" default="20" />
+  <arg name="bag_opt" default="" />
 
   <param name="use_sim_time" value="$(arg use_log)" />
 
@@ -39,7 +40,7 @@
   </node>
 
   <node pkg="rosbag" type="record" name="record" args="-o $(arg record_bag_dir)gnss -b 1 /rtcm3_0 /rtcm3_1" unless="$(arg use_log)" output="screen" />
-  <node pkg="rosbag" type="play" name="play" args="-s $(arg bag_skip) -r $(arg bag_rate) --clock $(arg bag_file)" if="$(arg use_log)">
+  <node pkg="rosbag" type="play" name="play" args="-s $(arg bag_skip) -r $(arg bag_rate) $(arg bag_opt) --clock $(arg bag_file)" if="$(arg use_log)">
     <remap from="rtcm3" to="rtcm3_0" /> <!-- for compatibility -->
   </node>
 </launch>
