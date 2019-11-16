@@ -74,7 +74,7 @@ private:
   {
     timer_.cancel();
 
-    timer_.expires_from_now(boost::posix_time::seconds(120.0));
+    timer_.expires_from_now(boost::posix_time::seconds(120));
     timer_.async_wait(
         boost::bind(&RTCM3Node::onTimeout, this,
                     boost::asio::placeholders::error));
@@ -146,7 +146,7 @@ public:
     boost::asio::ip::tcp::resolver::iterator dns_iter = resolver.resolve(dns_query);
     boost::asio::ip::tcp::endpoint endpoint = dns_iter->endpoint();
 
-    timer_.expires_from_now(boost::posix_time::seconds(10.0));
+    timer_.expires_from_now(boost::posix_time::seconds(10));
     timer_.async_wait(
         boost::bind(&RTCM3Node::onTimeoutConnect, this,
                     boost::asio::placeholders::error));
