@@ -46,7 +46,7 @@ public:
   {
     return 1019;
   }
-  bool decode(const Buffer &buf)
+  bool decode(const Buffer& buf)
   {
     size_t i = 24 + 12;
     unsigned int prn = buf.getUnsignedBits(i, 6);
@@ -89,7 +89,7 @@ public:
 
     return true;
   }
-  double getClockBias(const GTime &time) const
+  double getClockBias(const GTime& time) const
   {
     double E, Ek;
     int n;
@@ -111,7 +111,7 @@ public:
     return f0_ + f1_ * tk_toc.toSec() + f2_ * tk_toc.toSec() * tk_toc.toSec() -
            2.0 * sqrt(mu * A_) * e_ * sinE / pow(CLIGHT, 2.0);
   }
-  ECEF getPos(const GTime &time) const
+  ECEF getPos(const GTime& time) const
   {
     double E, Ek, u, r, i;
     int n;

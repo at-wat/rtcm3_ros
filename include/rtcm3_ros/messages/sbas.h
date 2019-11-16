@@ -38,7 +38,7 @@ public:
   {
     return 4001;
   }
-  void persistent(IonoDelay &iono)
+  void persistent(IonoDelay& iono)
   {
     switch (sbas_type_)
     {
@@ -49,13 +49,13 @@ public:
       }
       case 26:
       {
-        for (const auto &d : delays_)
+        for (const auto& d : delays_)
           iono.updateDelay(band_, d.first, iodi_, d.second);
         break;
       }
     }
   }
-  bool decode(const Buffer &buf_raw)
+  bool decode(const Buffer& buf_raw)
   {
     SbasMsg msg;
     memcpy(&msg, buf_raw.data() + 6, sizeof(SbasMsg));

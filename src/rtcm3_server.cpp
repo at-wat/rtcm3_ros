@@ -49,12 +49,12 @@ private:
 
   std::list<std::shared_ptr<boost::asio::ip::tcp::socket>> sockets_;
 
-  void cbStream(const rtcm3_ros::BinaryStream::ConstPtr &msg)
+  void cbStream(const rtcm3_ros::BinaryStream::ConstPtr& msg)
   {
     if (sockets_.size() == 0)
       return;
     std::map<std::shared_ptr<boost::asio::ip::tcp::socket>, bool> to_be_removed;
-    for (auto &s : sockets_)
+    for (auto& s : sockets_)
     {
       try
       {
@@ -63,7 +63,7 @@ private:
             boost::asio::buffer(boost::asio::const_buffer(msg->data.data(), msg->data.size())));
         to_be_removed[s] = false;
       }
-      catch (std::runtime_error &e)
+      catch (std::runtime_error& e)
       {
         ROS_ERROR("Write error: %s", e.what());
         to_be_removed[s] = true;
@@ -72,14 +72,14 @@ private:
     sockets_.erase(
         std::remove_if(
             sockets_.begin(), sockets_.end(),
-            [&to_be_removed](std::shared_ptr<boost::asio::ip::tcp::socket> &s) -> bool
+            [&to_be_removed](std::shared_ptr<boost::asio::ip::tcp::socket>& s) -> bool
             {
               return to_be_removed[s];
             }),
         sockets_.end());
   }
   void onAccept(
-      const boost::system::error_code &error)
+      const boost::system::error_code& error)
   {
     if (error)
     {
@@ -119,7 +119,7 @@ public:
 
     interval_ = nh_.createTimer(ros::Duration(0.1), &RTCM3ServerNode::cbTimer, this);
   }
-  void cbTimer(const ros::TimerEvent &event)
+  void cbTimer(const ros::TimerEvent& event)
   {
     boost::system::error_code ec;
     io_service_.poll(ec);
@@ -131,7 +131,7 @@ public:
   }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   ros::init(argc, argv, "rtcm3_server");
   RTCM3ServerNode node;

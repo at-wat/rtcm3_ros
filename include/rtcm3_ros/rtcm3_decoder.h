@@ -34,7 +34,7 @@ protected:
   std::map<int, SpawnerBase::Ptr> classes_;
 
 public:
-  RTCM3MessageBase::Ptr loadClass(const int &type)
+  RTCM3MessageBase::Ptr loadClass(const int& type)
   {
     if (classes_.find(type) == classes_.end())
     {
@@ -60,9 +60,9 @@ protected:
   RTCM3MessageCorrectionsClock::Ptr corrections_clock_;
   IonoDelay iono_;
 
-  using ObservationCallback = std::function<void(const std::vector<rtcm3_ros::Observation> &)>;
+  using ObservationCallback = std::function<void(const std::vector<rtcm3_ros::Observation>&)>;
   ObservationCallback cb_observations_;
-  using IonoCallback = std::function<void(const std::vector<rtcm3_ros::IonosphericDelayGridPoint> &)>;
+  using IonoCallback = std::function<void(const std::vector<rtcm3_ros::IonosphericDelayGridPoint>&)>;
   IonoCallback cb_iono_;
 
   bool require_ssr_;
@@ -85,7 +85,7 @@ public:
   {
     cb_iono_ = cb_iono;
   }
-  void process(const size_t id, const Buffer &input)
+  void process(const size_t id, const Buffer& input)
   {
     if (raw_buffer_.size() <= id)
       raw_buffer_.resize(id + 1);
@@ -121,7 +121,7 @@ public:
       it += length;
     }
   }
-  void decodeOneMessage(const Buffer &msg)
+  void decodeOneMessage(const Buffer& msg)
   {
     const int type = msg.getUnsignedBitsConst(24, 12);
     ROS_DEBUG("RTCM3: message type %d", type);
@@ -159,7 +159,7 @@ public:
           }
 
           std::vector<rtcm3_ros::Observation> observations;
-          for (auto &range : *ranges)
+          for (auto& range : *ranges)
           {
             if (ephemerides_.find(range.first) != ephemerides_.end())
             {
@@ -220,7 +220,7 @@ public:
           RTCM3MessageSbas::Ptr sbas = std::dynamic_pointer_cast<RTCM3MessageSbas>(decoder);
           sbas->persistent(iono_);
           std::vector<rtcm3_ros::IonosphericDelayGridPoint> igps;
-          for (const auto &d : iono_)
+          for (const auto& d : iono_)
           {
             rtcm3_ros::IonosphericDelayGridPoint igp;
             igp.latitude = d.first.first;
@@ -236,7 +236,7 @@ public:
         }
       }
     }
-    catch (std::runtime_error &e)
+    catch (std::runtime_error& e)
     {
       ROS_DEBUG("%s", e.what());
     }

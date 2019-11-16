@@ -47,11 +47,11 @@ private:
 
   rtcm3_ros::RTCM3Decoder dec_;
 
-  void cbStream(const rtcm3_ros::BinaryStream::ConstPtr &msg, const size_t stream_id)
+  void cbStream(const rtcm3_ros::BinaryStream::ConstPtr& msg, const size_t stream_id)
   {
     dec_.process(stream_id, rtcm3_ros::Buffer(msg->data));
   }
-  void cbObservations(const std::vector<rtcm3_ros::Observation> &observations)
+  void cbObservations(const std::vector<rtcm3_ros::Observation>& observations)
   {
     rtcm3_ros::ObservationArray array;
     array.header.stamp = ros::Time::now();
@@ -60,7 +60,7 @@ private:
 
     pub_observations_.publish(array);
   }
-  void cbIono(const std::vector<rtcm3_ros::IonosphericDelayGridPoint> &igps)
+  void cbIono(const std::vector<rtcm3_ros::IonosphericDelayGridPoint>& igps)
   {
     rtcm3_ros::IonosphericDelay iono;
     iono.header.stamp = ros::Time::now();
@@ -100,7 +100,7 @@ public:
   }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   ros::init(argc, argv, "rtcm3_decode");
   RTCM3Decode node;

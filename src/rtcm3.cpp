@@ -50,21 +50,21 @@ private:
 
   boost::asio::streambuf buf_;
 
-  void onTimeoutConnect(const boost::system::error_code &error)
+  void onTimeoutConnect(const boost::system::error_code& error)
   {
     if (error)
       return;
     ROS_ERROR("Connection failed: %s", error.message().c_str());
     ros::shutdown();
   }
-  void onTimeout(const boost::system::error_code &error)
+  void onTimeout(const boost::system::error_code& error)
   {
     if (error)
       return;
     ROS_ERROR("Connection timedout: %s", error.message().c_str());
     ros::shutdown();
   }
-  void onConnect(const boost::system::error_code &error)
+  void onConnect(const boost::system::error_code& error)
   {
     timer_.cancel();
     ROS_INFO("Connected");
@@ -87,7 +87,7 @@ private:
             this,
             boost::asio::placeholders::error));
   };
-  void onRead(const boost::system::error_code &error)
+  void onRead(const boost::system::error_code& error)
   {
     timer_.cancel();
     if (error == boost::asio::error::eof)
@@ -105,7 +105,7 @@ private:
     auto length = buf_.size();
 
     rtcm3_ros::BinaryStream array;
-    const uint8_t *p = boost::asio::buffer_cast<const uint8_t *>(buf_.data());
+    const uint8_t* p = boost::asio::buffer_cast<const uint8_t*>(buf_.data());
     array.header.frame_id = frame_id_;
     array.header.stamp = ros::Time::now();
     array.data = std::vector<uint8_t>(&p[0], &p[length]);
@@ -115,7 +115,7 @@ private:
     buf_.consume(length);
     receivePacket();
   }
-  void cbTimer(const ros::TimerEvent &event)
+  void cbTimer(const ros::TimerEvent& event)
   {
     boost::system::error_code ec;
     io_service_.poll(ec);
@@ -160,7 +160,7 @@ public:
   };
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   ros::init(argc, argv, "rtcm3");
   RTCM3Node node;

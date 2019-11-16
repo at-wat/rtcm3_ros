@@ -23,7 +23,7 @@ public:
   };
   virtual int getType() const = 0;
   virtual int getCategory() const = 0;
-  virtual bool decode(const Buffer &) = 0;
+  virtual bool decode(const Buffer&) = 0;
 };
 
 class RTCM3MessageEphemeridesBase : public RTCM3MessageBase
@@ -34,9 +34,9 @@ public:
   {
     return Category::EPHEMERIDES;
   }
-  virtual bool decode(const Buffer &) = 0;
-  virtual double getClockBias(const GTime &time) const = 0;
-  virtual ECEF getPos(const GTime &time) const = 0;
+  virtual bool decode(const Buffer&) = 0;
+  virtual double getClockBias(const GTime& time) const = 0;
+  virtual ECEF getPos(const GTime& time) const = 0;
   virtual int getSatId() const = 0;
 };
 
@@ -50,7 +50,7 @@ public:
   {
     return Category::PSEUDO_RANGE;
   }
-  virtual bool decode(const Buffer &) = 0;
+  virtual bool decode(const Buffer&) = 0;
   virtual Container::iterator begin() = 0;
   virtual Container::iterator end() = 0;
   const Container::iterator begin() const
@@ -71,7 +71,7 @@ class RTCM3MessageCorrectionsBase : public RTCM3MessageBase
 {
 public:
   using Ptr = std::shared_ptr<RTCM3MessageCorrectionsBase>;
-  virtual bool decode(const Buffer &) = 0;
+  virtual bool decode(const Buffer&) = 0;
 };
 
 };  // namespace rtcm3_ros

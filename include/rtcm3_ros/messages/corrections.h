@@ -69,7 +69,7 @@ public:
   {
     return Category::CORRECTION_ORBIT;
   }
-  bool decode(const Buffer &buf)
+  bool decode(const Buffer& buf)
   {
     size_t i = 24 + 12;
     double tow = buf.getUnsignedBits(i, 20) * 1.0;
@@ -122,7 +122,7 @@ public:
     }
     return true;
   }
-  bool correctOrbit(ECEF &pos, const size_t sat_id, const GTime &time)
+  bool correctOrbit(ECEF& pos, const size_t sat_id, const GTime& time)
   {
     if (corrections_.find(sat_id) == corrections_.end())
       return false;
@@ -211,7 +211,7 @@ public:
   {
     return Category::CORRECTION_CLOCK;
   }
-  bool decode(const Buffer &buf)
+  bool decode(const Buffer& buf)
   {
     size_t i = 24 + 12;
     double tow = buf.getUnsignedBits(i, 20) * 1.0;
@@ -250,7 +250,7 @@ public:
     }
     return true;
   }
-  double getClockCorrections(const size_t sat_id, const GTime &time)
+  double getClockCorrections(const size_t sat_id, const GTime& time)
   {
     if (corrections_.find(sat_id) == corrections_.end())
       return 0.0;

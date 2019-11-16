@@ -57,13 +57,13 @@ public:
     : std::vector<uint8_t>(begin, end)
   {
   }
-  Buffer operator+(const Buffer &a)
+  Buffer operator+(const Buffer& a)
   {
     Buffer b = *this;
     b.insert(b.end(), a.begin(), a.end());
     return b;
   }
-  unsigned int getUnsignedBits(size_t &pos, const size_t len, const bool increment = true) const
+  unsigned int getUnsignedBits(size_t& pos, const size_t len, const bool increment = true) const
   {
     unsigned int bits = 0;
     for (size_t i = pos; i < pos + len; i++)
@@ -76,7 +76,7 @@ public:
       pos += len;
     return bits;
   }
-  int getSignedBits(size_t &pos, const size_t len, const bool increment = true) const
+  int getSignedBits(size_t& pos, const size_t len, const bool increment = true) const
   {
     unsigned int bits = getUnsignedBits(pos, len, increment);
     if (!(bits & (1u << (len - 1))))
@@ -85,7 +85,7 @@ public:
     }
     return static_cast<int>(bits | (~0u << len));
   }
-  unsigned int getUnsignedBitsConst(const size_t &pos, const size_t len) const
+  unsigned int getUnsignedBitsConst(const size_t& pos, const size_t len) const
   {
     unsigned int bits = 0;
     for (size_t i = pos; i < pos + len; i++)
@@ -96,7 +96,7 @@ public:
     }
     return bits;
   }
-  int getSignedBitsConst(const size_t &pos, const size_t len) const
+  int getSignedBitsConst(const size_t& pos, const size_t len) const
   {
     unsigned int bits = getUnsignedBitsConst(pos, len);
     if (!(bits & (1u << (len - 1))))
@@ -109,7 +109,7 @@ public:
   {
     unsigned int crc = 0;
 
-    for (auto &c : *this)
+    for (auto& c : *this)
       crc = ((crc << 8) & 0xFFFFFF) ^ CRC24Q_TABLE[(crc >> 16) ^ c];
     return crc;
   }

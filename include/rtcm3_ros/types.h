@@ -32,7 +32,7 @@ public:
     , z_(z)
   {
   }
-  explicit ECEF(const LatLonHeight &llh);
+  explicit ECEF(const LatLonHeight& llh);
   double x() const
   {
     return x_;
@@ -45,15 +45,15 @@ public:
   {
     return z_;
   }
-  double &x()
+  double& x()
   {
     return x_;
   }
-  double &y()
+  double& y()
   {
     return y_;
   }
-  double &z()
+  double& z()
   {
     return z_;
   }
@@ -78,7 +78,7 @@ public:
     lon_ = lon;
     height_ = height;
   }
-  explicit LatLonHeight(const ECEF &ecef);
+  explicit LatLonHeight(const ECEF& ecef);
   double lat() const
   {
     return lat_;
@@ -93,13 +93,13 @@ public:
   }
 };
 
-ECEF::ECEF(const LatLonHeight &llh)
+ECEF::ECEF(const LatLonHeight& llh)
 {
   x_ = llh.height() * cos(llh.lat()) * cos(llh.lon());
   y_ = llh.height() * cos(llh.lat()) * sin(llh.lon());
   z_ = llh.height() * sin(llh.lat());
 }
-LatLonHeight::LatLonHeight(const ECEF &ecef)
+LatLonHeight::LatLonHeight(const ECEF& ecef)
 {
   lat_ = atan2(ecef.y(), ecef.x());
   lon_ = atan2(ecef.z(), sqrt(pow(ecef.x(), 2) + pow(ecef.y(), 2)));
@@ -158,7 +158,7 @@ public:
   {
     return static_cast<double>(sec_) + psec_ * 1e-12;
   }
-  Duration operator+(const Duration &a) const
+  Duration operator+(const Duration& a) const
   {
     return Duration(sec_ + a.sec_, psec_ + a.psec_);
   }
@@ -188,17 +188,17 @@ public:
     sec_ = sec;
     psec_ = psec;
   }
-  Duration operator-(const Time &in) const
+  Duration operator-(const Time& in) const
   {
     return Duration(
         static_cast<int64_t>(sec_) - static_cast<int64_t>(in.sec_),
         static_cast<int64_t>(psec_) - static_cast<int64_t>(in.psec_));
   }
-  bool operator==(const Time &in) const
+  bool operator==(const Time& in) const
   {
     return sec_ == in.sec_ && psec_ == in.psec_;
   }
-  bool operator<(const Time &in) const
+  bool operator<(const Time& in) const
   {
     if (sec_ == in.sec_)
       return psec_ < in.psec_;
@@ -258,7 +258,7 @@ public:
           std::pair<Time, int>(Time(394297200), 2),
           std::pair<Time, int>(Time(362761200), 1),
         };
-    for (auto &leap : leaps)
+    for (auto& leap : leaps)
     {
       if (leap.first < t2)
       {
@@ -309,13 +309,13 @@ public:
   {
     return week_;
   }
-  Duration operator-(const GTime &in) const
+  Duration operator-(const GTime& in) const
   {
     return Duration(
         week_ - in.week_,
         static_cast<int64_t>(tow_psec_) - static_cast<int64_t>(in.tow_psec_));
   }
-  GTime operator+(const Duration &in) const
+  GTime operator+(const Duration& in) const
   {
     return GTime(week_, tow_psec_ + in.sec_ * SEC + in.psec_);
   }
@@ -506,7 +506,7 @@ protected:
   struct BandPart
   {
     int x_;
-    YTable const *y_;
+    YTable const* y_;
   };
   struct BandA
   {
@@ -625,7 +625,7 @@ public:
     {
       size_t grid_start = 0;
       int x(0), y(0);
-      for (const auto &b : BAND_A[band].bands_)
+      for (const auto& b : BAND_A[band].bands_)
       {
         const size_t grid_end = grid_start + b.y_->size_;
         if (id < grid_end)
@@ -643,7 +643,7 @@ public:
     {
       size_t grid_start = 0;
       int x(0), y(0);
-      for (const auto &b : BAND_B[band].bands_)
+      for (const auto& b : BAND_B[band].bands_)
       {
         const size_t grid_end = grid_start + b.y_->size_;
         if (id < grid_end)
@@ -661,7 +661,7 @@ public:
   }
   void updateMask(
       const uint32_t band,
-      const IonoMask &mask)
+      const IonoMask& mask)
   {
     masks_[band] = mask;
   }

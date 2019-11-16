@@ -36,8 +36,8 @@ protected:
   uint8_t sync_;
 
 public:
-  virtual bool decode(const Buffer &buf) = 0;
-  int decodeHeader(const Buffer &buf)
+  virtual bool decode(const Buffer& buf) = 0;
+  int decodeHeader(const Buffer& buf)
   {
     size_t i = 24 + 12;
 
@@ -66,9 +66,9 @@ public:
       if (mask)
         sigs_.push_back(j);
     }
-    for (auto &sat : sats_)
+    for (auto& sat : sats_)
     {
-      for (auto &sig : sigs_)
+      for (auto& sig : sigs_)
       {
         cellmask_[std::pair<uint8_t, uint8_t>(sat, sig)] = buf.getUnsignedBits(i, 1);
       }
@@ -90,9 +90,9 @@ public:
   {
     return 1077;
   }
-  bool decode(const Buffer &buf)
+  bool decode(const Buffer& buf)
   {
-    const char *SIGNAL_TYPE_NAMES[] =
+    const char* SIGNAL_TYPE_NAMES[] =
         {
           "", "1C", "1P", "1W", "1Y", "1M", "", "2C", "2P", "2W", "2Y", "2M",
           "", "", "2S", "2L", "2X", "", "", "", "", "5I", "5Q", "5X",
@@ -124,7 +124,7 @@ public:
 
     std::map<size_t, bool> error_status;
     std::map<size_t, double> pseudo_range_base;
-    for (auto &sat : sats_)
+    for (auto& sat : sats_)
     {
       const auto pseudo_range_base_raw = buf.getUnsignedBits(i, 8);
       if (pseudo_range_base_raw == 255)
@@ -134,17 +134,17 @@ public:
       pseudo_range_base[sat] = pseudo_range_base_raw * RANGE_MS;
     }
     std::map<int, unsigned int> ex;
-    for (auto &sat : sats_)
+    for (auto& sat : sats_)
     {
       ex[sat] = buf.getUnsignedBits(i, 4);
     }
-    for (auto &sat : sats_)
+    for (auto& sat : sats_)
     {
       const auto pseudo_range_base_raw = buf.getUnsignedBits(i, 10);
       pseudo_range_base[sat] += pseudo_range_base_raw * pow(2.0, -10.0) * RANGE_MS;
     }
     std::map<size_t, double> phase_range_rate_base;
-    for (auto &sat : sats_)
+    for (auto& sat : sats_)
     {
       const auto phase_range_rate_base_raw = buf.getSignedBits(i, 14);
       if (phase_range_rate_base_raw == -8192)
@@ -160,7 +160,7 @@ public:
     size_t i_cnr = i_half + cellmask_.size() * 1;
     size_t i_phase_range_rate = i_cnr + cellmask_.size() * 10;
     ranges_.clear();
-    for (auto &satsig : cellmask_)
+    for (auto& satsig : cellmask_)
     {
       const auto pseudo_range_raw = buf.getSignedBits(i_pseudo_range, 20);
       if (pseudo_range_raw == -524288)
